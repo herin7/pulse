@@ -1,166 +1,372 @@
-# ⚡ Pulse — The AI Co-founder You've Always Wanted
+# Pulse 
+### Personal Intelligence for Founders Who Can't Afford to Forget
 
-> Pulse is a high-stakes AI advisory platform designed specifically for startup founders. It doesn't just chat; it tracks your commitments, monitors your competitors, and lives within your data to hold you accountable.
-
----
-
-## 🚀 The Vision
-
-In the chaotic early days of a startup, founders often lack a true peer who knows their journey as well as they do. **Pulse** (internally "Life Co-founder") fills this gap by ingesting your entire professional identity—from GitHub commits to LinkedIn history and deep psychological self-reports—to build an AI partner that understands your blind spots, celebrates your wins, and calls out your failures with radical candor.
+> Built in 24 hours by a 3rd year CS student.
+> Not a side project. A statement.
+> : Herin Soni, LDCE Ahmedabad
 
 ---
 
-## ✨ Key Features
+## 📺 Demo
 
-### 📂 3-Source Deep Ingestion
-Pulse builds its brain by cross-referencing three critical data sources:
-*   **LLM Self-Report**: A deep-dive psychological and professional survey.
-*   **LinkedIn Profile**: Automated extraction of your professional milestones and network context.
-*   **GitHub Activity**: Direct analysis of your technical output, languages, and star-power.
+[![Pulse Demo](https://img.shields.io/badge/Watch%20Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://youtu.be/tPbMx9IJRHc)
 
-### 🧠 Dynamic Character Card
-After ingestion, Pulse generates a unique "Character Card" that defines your founder persona. It tracks:
-*   **North Star**: Your ultimate mission.
-*   **Blind Spots**: Areas where you likely struggle.
-*   **Tech Stack & Operating Style**: How you actually get things done.
 
-### 🗣️ RAG-Powered Chat with Voice
-*   **Context-Aware**: Uses Vector Search (Qdrant) to pull relevant snippets from your past data into every conversation.
-*   **Voice Standups**: Supports browser-based speech recognition for quick daily updates.
-*   **Voice Synthesis**: The co-founder speaks back to you using native browser synthesis.
+**Live App → [itspulse.vercel.app](https://itspulse.vercel.app)**
 
-### 🔁 Commitment Tracking (Open Loops)
-Pulse automatically detects commitments made in chat (e.g., "I'll finish the landing page by Tuesday") and stores them as "Open Loops." It surfaces these in the sidebar to ensure nothing slips through the cracks.
+---
 
-### 🕵️ Competitive Intelligence
-*   **Daily Cron Jobs**: Automated tracking of your competitors using Google Search (Serper).
-*   **Urgency Ratings**: High-urgency competitive threats are injected directly into the chat header.
+## What Is Pulse
+
+Pulse is a RAG-powered personal intelligence layer built for startup founders.
+
+You talk to it like a co-founder. It remembers everything : your commitments, your competitors, your open decisions. It tracks what you said you'd do. It lives inside your data, not outside it.
+
+It is not a chatbot. It is not a note-taking app. It is not another AI wrapper.
+
+It treats your **thought stream as structured data** and acts on it.
+
+---
+
+## What It Does
+
+### 🧠 Deep Founder Ingestion
+Pulse builds its brain from 3 sources you already have:
+- **LLM Self-Report** : a psychological and professional deep-dive you paste in
+- **LinkedIn Profile** : raw paste of your career history and experience
+- **GitHub Activity** : auto-fetched repos, languages, stars, and commit patterns
+
+From this it generates a **Founder Character Card** : a living profile that grounds every conversation. Not generic. Brutally specific to you.
+
+### 💬 RAG-Powered Chat
+Every message is embedded in-browser, matched against your personal vector knowledge base, enriched with your open loops and competitor intel, then sent to the LLM. The AI knows your context before you explain it.
+
+### 🔁 Open Loop Tracking
+Pulse automatically extracts commitments from your conversations : *"I'll send the investor update by Friday"* : stores them as open loops, and surfaces them in the sidebar. Nothing slips.
+
+### 🕵️ Competitor Intelligence
+Add competitors once. Pulse runs daily automated web searches via Serper, LLM-summarizes results with urgency ratings (high / medium / low), and injects high-urgency threats directly into your chat context. You don't check on them. They come to you.
+
+### 🎙️ Voice Standup
+Hit the mic. Talk. Pulse transcribes your standup using browser speech recognition, generates a structured summary (moved / stalled / next), and speaks its reply back using browser voice synthesis.
 
 ### ✉️ Gmail Integration
-*   Connect your Gmail account via OAuth.
-*   Draft, review, and send or schedule emails directly from the chat interface.
+Say *"draft an email to the investor"* : Pulse writes a polished draft, renders it in a review card, and lets you send immediately or schedule delivery. Connected per user via Google OAuth.
+
+### ⏰ Smart Reminders
+Say *"remind me to call Rahul at 6pm"* : Pulse parses it, stores it server-side, and surfaces an in-app popup at exactly the right time.
+
+### 🔀 Multi-LLM Runtime Switching
+Switch models from the UI with no restart:
+
+| Model | Provider | Cost |
+|---|---|---|
+| Gemini 2.0 Flash | Google | Free |
+| Llama 3.3 70B | Groq | Free |
+| Claude Sonnet 4 | Anthropic | Paid |
 
 ---
 
-## 🛠️ Tech Stack
+## Architecture
 
-### Frontend
-- **Framework**: React 19 + Vite 6
-- **State Management**: Redux Toolkit
-- **Styling**: Tailwind CSS 3
-- **Embeddings**: `all-MiniLM-L6-v2` (Generated **in-browser** via WASM to preserve privacy and speed).
+<img width="650" height="650" alt="Untitled-2025-08-23-2231 (1)" src="https://github.com/user-attachments/assets/8df02dd8-f7ce-44ce-af9f-e240bfbf1e66" />
+                
 
-### Backend
-- **Runtime**: Node.js (ESM) + Express 5
-- **Vector DB**: Qdrant Cloud
-- **SQL DB**: PostgreSQL (Neon Tech) for persistence (loops, intel, reminders).
-- **NoSQL DB**: MongoDB for User Profiles and Agent Configuration.
-- **LLMs**: Multi-provider support (Gemini 2.0 Flash, Llama 3.3 70B via Groq, Claude 3.5 Sonnet).
+## RAG Pipeline : Deep Dive
 
----
+The core of Pulse. Every chat message goes through this exact flow:
 
-## 🏗️ Architecture
-
-```mermaid
-graph TD
-    subgraph Client [Browser]
-        A[React UI] --> B[Redux Store]
-        A --> C[WASM Embedding Engine]
-    end
-
-    subgraph Server [Node.js Express]
-        D[API Routes] --> E[LLM Gateway]
-        D --> F[Vector Controller]
-        D --> G[Cron Scheduler]
-    end
-
-    subgraph Data [Storage Layers]
-        H[(Qdrant Vector DB)]
-        I[(PostgreSQL)]
-        J[(MongoDB)]
-    end
-
-    C -- "384-dim Vectors" --> F
-    F --> H
-    D --> I
-    D --> J
-    E -- "Gemini / Groq / Claude" --> K[LLM Providers]
-    G -- "Serper Search" --> L[External APIs]
+```
+User types message
+        │
+        ▼
+┌────────────────────┐
+│   embed(message)   │  ← WASM Web Worker, browser-side
+│   384-dim vector   │  ← all-MiniLM-L6-v2, zero API cost
+└────────┬───────────┘
+         │
+         ▼
+POST /api/chat { message, queryEmbedding, history }
+         │
+    ┌────┴──────────────────────────────────┐
+    │           PARALLEL FETCH              │
+    ├──────────────┬────────────────────────┤
+    ▼              ▼                        ▼
+searchSimilar() getCharacterCard()    getOpenLoops()
+top-5 chunks    founder profile       active commitments
+Qdrant cosine   Qdrant scroll         SQLite query
+    │              │                        │
+    └──────────────┴────────────────────────┘
+                        │
+                        ▼
+              getRecentIntel()
+              competitor signals
+              ordered: high → medium → low
+              from SQLite
+                        │
+                        ▼
+         ┌──────────────────────────┐
+         │    buildSystemPrompt()   │
+         │                          │
+         │  [⚠ URGENT INTEL]         ← top if high urgency exists 
+         │  Founder persona         │
+         │  Character card          │
+         │  RAG context chunks      │
+         │  Open loops              │
+         │  Recent intel            │
+         └──────────────┬───────────┘
+                        │
+                        ▼
+                  callLLM()
+                  Gemini / Groq / Claude
+                        │
+             ┌──────────┴──────────────┐
+             │                         │
+             ▼                         ▼
+    Response to client       detectOpenLoops()
+                             fire-and-forget
+                             extract commitments
+                             first-5-word dedup
+                             insert SQLite
 ```
 
 ---
 
-## ⚙️ Setup & Installation
+## Ingest + Store Pipeline
 
-### 1. Prerequisites
-- **Node.js**: v18+
-- **PostgreSQL**: A running instance (or Neon.tech URL)
-- **MongoDB**: A running instance (local or Atlas)
-- **Qdrant**: A Cloud cluster or local docker instance
-
-### 2. Environment Variables
-Create a `.env` file in the `server/` directory:
-
-```env
-PORT=3001
-DATABASE_URL=your_postgres_url
-MONGO_URI=your_mongo_url
-QDRANT_URL=your_qdrant_url
-QDRANT_API_KEY=your_key
-
-# LLM Keys (Configure at least one)
-GEMINI_API_KEY=
-GROQ_API_KEY=
-ANTHROPIC_API_KEY=
-ACTIVE_MODEL=gemini
-
-# Integrations
-SERPER_API_KEY=your_serper_key
-SESSION_SECRET=your_secret
-JWT_SECRET=your_jwt_secret
-
-# Optional Gmail (OAuth)
-GMAIL_CLIENT_ID=
-GMAIL_CLIENT_SECRET=
-GMAIL_REDIRECT_URI=http://localhost:3001/api/agent-setup/gmail/callback
+```
+Founder fills 3-step onboarding form
+              │
+              ▼
+      POST /api/ingest
+        │
+        ├── GitHub API (parallel fetch)
+        │     GET /users/{username}
+        │     GET /users/{username}/repos → top starred
+        │     GET /users/{username}/repos → language agg
+        │
+        ├── chunkText() each source
+        │     sentence-aware splitting
+        │     1600 char chunks, 160 char overlap
+        │     source-tagged: ai / linkedin / github
+        │
+        └── return chunks[] to browser
+              │
+              ▼
+      Browser Web Worker (Thread 2)
+        embed() chunks in batches of 5
+        all-MiniLM-L6-v2 WASM backend
+        384-dim L2-normalized vectors
+              │
+              ▼
+      POST /api/store { chunks + embeddings }
+        │
+        ├── ensureCollection() : Qdrant setup + indexes
+        ├── upsertChunks() : store all vectors
+        │
+        ├── balanced source sampling
+        │     5 chunks per source
+        │     prevents any source dominating the card
+        │
+        ├── LLM character card generation
+        │     1500 token budget
+        │     JSON: name · founderType · building · stage
+        │           coreDrive · techStack · strengths
+        │           blindspots · biggestRisk · northStar
+        │           operatingStyle
+        │
+        └── upsertCharacterCard()
+              deterministic UUID via uuidv5
+              zero-vector (metadata only)
+              always overwrites same point per user
 ```
 
-### 3. Installation
-From the root directory:
+---
+
+## Competitor Intelligence Pipeline
+
+```
+node-cron: '0 8 * * *' : daily 8AM
+              │
+              ▼
+      getCompetitors(userId)
+              │
+              ▼  Promise.allSettled : fully parallel
+    ┌─────────────────────────────────┐
+    │  Per competitor:                │
+    │                                 │
+    │  3 Serper searches (parallel):  │
+    │  → "{name} product launch OR    │
+    │      new feature OR update"     │
+    │  → "{name} funding OR           │
+    │      valuation OR raised"       │
+    │  → "{name} pricing OR           │
+    │      hiring OR layoffs"         │
+    │                                 │
+    │  Deduplicate results by title   │
+    │                                 │
+    │  LLM summarize → JSON:          │
+    │  { summary, category, urgency } │
+    │                                 │
+    │  insertIntel() → SQLite         │
+    └─────────────────────────────────┘
+              │
+              ▼
+    Next chat request:
+    high urgency → injected at TOP of prompt  ⚠
+    medium/low   → injected at bottom
+```
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Why |
+|---|---|---|
+| Frontend | React 19 + Vite 6 | Fast dev, concurrent features |
+| Styling | Tailwind CSS 3 | Rapid UI |
+| Embeddings | all-MiniLM-L6-v2 WASM | Zero API cost, offline capable |
+| Backend | Node.js ESM + Express 5 | Modern JS, clean async |
+| Vector DB | Qdrant Cloud | Best-in-class cosine search |
+| SQL | SQLite + WAL | Zero infra, concurrent safe |
+| Relational | PostgreSQL / Neon | Managed, time-sensitive data |
+| Document | MongoDB Atlas | Flexible schema for agent profiles |
+| LLMs | Gemini / Groq / Claude | Multi-provider, runtime switchable |
+| Search | Serper.dev | Google results via API |
+| Auth | express-session + Google OAuth | Per-user Gmail connect |
+| Scheduling | node-cron | Daily competitor tracking |
+| Deploy | Vercel + Railway | Free tier, fast CI |
+
+---
+
+## Run Locally
+
+### Prerequisites
+- Node.js v18+
+- Qdrant Cloud : free at cloud.qdrant.io
+- PostgreSQL : Neon.tech free tier
+- MongoDB : Atlas free tier
+
+### Setup
+
 ```bash
+git clone https://github.com/herin7/pulse
+cd pulse
 npm install
-```
-
-### 4. Running the App
-The project uses `npm workspaces` to run both client and server concurrently.
-
-**Development mode:**
-```bash
-# Windows
-./dev.bat
-
-# Unix
-./dev.sh
-
-# Or directly via npm
+cp server/.env.example server/.env
+# fill in your keys
 npm run dev
 ```
 
-The app will be available at:
-- **Frontend**: [http://localhost:5173](http://localhost:5173)
-- **Backend API**: [http://localhost:3001](http://localhost:3001)
+### Environment Variables
+
+```env
+PORT=3001
+SESSION_SECRET=any-random-string
+
+# Databases
+QDRANT_URL=your_qdrant_cluster_url
+QDRANT_API_KEY=your_qdrant_key
+DATABASE_URL=your_postgres_url
+MONGO_URI=your_mongodb_url
+
+# LLMs : configure at least one
+GEMINI_API_KEY=         # free : aistudio.google.com
+GROQ_API_KEY=           # free : console.groq.com
+ANTHROPIC_API_KEY=      # paid
+
+ACTIVE_MODEL=gemini     # gemini | groq_llama | claude
+
+# Competitor tracking
+SERPER_API_KEY=         # serper.dev
+TRACKER_USER_ID=        # your UUID from localStorage after first login
+
+# Gmail (optional)
+GMAIL_CLIENT_ID=
+GMAIL_CLIENT_SECRET=
+GMAIL_REDIRECT_URI=http://localhost:3001/api/agent-setup/gmail/callback
+GMAIL_REFRESH_TOKEN=
+GMAIL_SENDER_EMAIL=
+```
+
+### URLs
+- Frontend → http://localhost:5173
+- Backend → http://localhost:3001
+- Health → http://localhost:3001/health
 
 ---
 
-## 🔄 Core Data Flow
+## Project Structure
 
-1.  **Onboarding**: Founder submits raw professional text.
-2.  **Vectorization**: The browser generates embeddings for text chunks using local WASM.
-3.  **Storage**: Vectors are stored in Qdrant; SQL metadata is stored in Postgres.
-4.  **Persona Synthesis**: An LLM analyzes the sampled data to create a "Character Card."
-5.  **RAG Chat**: Every user message is embedded, matched against Qdrant, combined with "Open Loops" and "Competitor Intel," and sent to the LLM for an opinionated response.
+```
+pulse/
+├── client/src/
+│   ├── App.jsx                  # Screen state machine
+│   ├── Onboarding.jsx           # 3-step data collection
+│   ├── IngestFlow.jsx           # Embed + store pipeline UI
+│   ├── Chat.jsx                 # Main interface
+│   ├── embeddings.worker.js     # WASM embedding web worker
+│   └── useEmbeddings.js         # Hook wrapping the worker
+│
+└── server/
+    ├── server.js                # Express app + cron scheduler
+    ├── config/models.js         # LLM registry
+    ├── utils/
+    │   ├── llmCall.js           # Unified multi-provider LLM caller
+    │   └── chunkText.js         # Sentence-aware chunker
+    ├── db/
+    │   ├── qdrant.js            # Vector operations
+    │   ├── openLoops.js         # Commitment storage
+    │   └── competitors.js       # Intel storage
+    ├── routes/
+    │   ├── ingest.js
+    │   ├── store.js
+    │   ├── chat.js
+    │   ├── config.js
+    │   ├── session.js
+    │   ├── reminders.js
+    │   └── agentSetup.js
+    └── agents/
+        ├── loopDetector.js
+        ├── competitorTracker.js
+        ├── tools.js
+        ├── toolExecutor.js
+        ├── reminderParser.js
+        └── emailScheduler.js
+```
 
 ---
 
-## 📄 License
-This project is private and proprietary. Copyright © 2026 Pulse Team.
+## Roadmap
+
+**🧩 Browser Extension**
+Capture context from any tab : ChatGPT, Notion, Claude, articles : into Pulse memory in one click.
+
+**🔁 Cross-Questioning Engine**
+When you mention something for the 3rd time without resolving it, Pulse pushes back with a sharp, specific question referencing past context.
+
+**⚡ Proactive Agent Triggers**
+Pulse detects action items and executes without being asked. You mention a follow-up : it drafts the email before you ask.
+
+**🕸 Relationship Graph**
+Visual map of everyone you've mentioned, your open loops with them, last contacted.
+
+**🖥 Ollama Support**
+Full local mode. Zero API cost. Your data never leaves your machine.
+
+**📱 Mobile PWA**
+Add thoughts between meetings from your phone.
+
+---
+
+## Honest Assessment
+
+This is a 24-hour build by a single developer.
+
+What it has : a working RAG pipeline, real vector search, multi-source ingestion, competitor intel on a daily cron, Gmail draft and schedule flow, voice input and output, open loop extraction, multi-LLM runtime switching, and an architecture that scales.
+
+What it doesn't have yet : the roadmap above.
+
+---
+
+*This README is my cover letter. The code is my resume.*
