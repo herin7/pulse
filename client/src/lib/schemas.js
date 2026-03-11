@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// ── Onboarding step 0: LLM dump ─────────────────────────────────────────────
 export const llmDumpSchema = z.object({
     llmDump: z
         .string()
@@ -8,7 +7,6 @@ export const llmDumpSchema = z.object({
         .max(40_000, 'Too long — trim it down under 40,000 characters.'),
 });
 
-// ── Onboarding step 1: LinkedIn ──────────────────────────────────────────────
 export const linkedinSchema = z.object({
     linkedinPaste: z
         .string()
@@ -16,7 +14,6 @@ export const linkedinSchema = z.object({
         .max(60_000, 'Too long — paste just the profile section.'),
 });
 
-// ── Onboarding step 2: GitHub ────────────────────────────────────────────────
 export const githubSchema = z.object({
     githubUsername: z
         .string()
@@ -28,28 +25,36 @@ export const githubSchema = z.object({
         ),
 });
 
-// ── BYOK API key ─────────────────────────────────────────────────────────────
 export const apiKeySchema = z.object({
     gemini: z.string().startsWith('AIza', 'Gemini keys start with "AIza"').optional().or(z.literal('')),
     groq: z.string().startsWith('gsk_', 'Groq keys start with "gsk_"').optional().or(z.literal('')),
     claude: z.string().startsWith('sk-ant-', 'Anthropic keys start with "sk-ant-"').optional().or(z.literal('')),
 });
 
-// ── Chat message ─────────────────────────────────────────────────────────────
 export const chatMessageSchema = z.object({
     role: z.enum(['user', 'assistant']),
     content: z.string().min(1).max(32_000),
     sources: z.array(z.string()).optional(),
 });
 
-// ── Helper: validate and return typed result ─────────────────────────────────
 export function validate(schema, data) {
-    const result = schema.safeParse(data);
-    if (result.success) return { ok: true, data: result.data, errors: {} };
-    const errors = {};
-    result.error.errors.forEach((e) => {
-        const key = e.path[0] || '_root';
-        if (!errors[key]) errors[key] = e.message;
-    });
-    return { ok: false, data: null, errors };
+    try {
+        const result = schema.safeParse(data);
+        if (result.success) return { ok: true, data: result.data, errors: {} };
+
+        const errors = {};
+        const issues = result.error?.errors || result.error?.issues || [];
+
+        if (Array.isArray(issues)) {
+            issues.forEach((e) => {
+                const key = e.path[0] || '_root';
+                if (!errors[key]) errors[key] = e.message;
+            });
+        }
+
+        return { ok: false, data: null, errors };
+    } catch (err) {
+        console.error('Validation crash:', err);
+        return { ok: false, data: null, errors: { _root: 'Internal validation error' } };
+    }
 }

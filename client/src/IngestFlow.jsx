@@ -35,9 +35,13 @@ export default function IngestFlow({ formData, onComplete }) {
 
       if (!ingestRes.ok) throw new Error('Ingest request failed');
       const { chunks, warnings } = await ingestRes.json();
-      if (warnings?.length) {
+      if (warnings && Array.isArray(warnings) && warnings.length) {
         warnings.forEach((w) => console.warn('[Ingest]', w));
         setStep(warnings[0]);
+        await new Promise((r) => setTimeout(r, 2500));
+      } else if (warnings && typeof warnings === 'string') {
+        console.warn('[Ingest]', warnings);
+        setStep(warnings);
         await new Promise((r) => setTimeout(r, 2500));
       }
       setProgress(15);
