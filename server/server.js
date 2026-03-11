@@ -2,7 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
-import connectSqlite3 from 'connect-sqlite3';
+import pgSession from 'connect-pg-simple';
+import pool, { initDb } from './db/postgres.js';
 import cron from 'node-cron';
 import ingestRouter from './routes/ingest.js';
 import storeRouter from './routes/store.js';
@@ -13,7 +14,7 @@ import competitorsRouter from './routes/competitors.js';
 import loopsRouter from './routes/loops.js';
 import { runDailyTracker } from './agents/competitorTracker.js';
 
-const SQLiteStore = connectSqlite3(session);
+const pgStore = pgSession(session);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -24,9 +25,9 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(session({
-  store: new SQLiteStore({
-    db: 'sessions.db',
-    dir: './db',
+  store: new pgStore({
+    pool: pool,
+    tableName: 'session'
   }),
   secret: process.env.SESSION_SECRET || 'pulse-dev-secret',
   resave: false,
@@ -46,14 +47,20 @@ app.use('/api', sessionRouter);
 app.use('/api/competitors', competitorsRouter);
 app.use('/api/loops', loopsRouter);
 
-app.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
+// Initialize Database and Start Server
+initDb().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server listening on http://localhost:${PORT}`);
 
-  if (process.env.TRACKER_USER_ID) {
-    cron.schedule('0 8 * * *', () => {
-      console.log('[Cron] Running daily competitor tracker...');
-      runDailyTracker(process.env.TRACKER_USER_ID);
-    });
-    console.log('[Cron] Daily competitor tracker scheduled at 08:00');
-  }
+    if (process.env.TRACKER_USER_ID) {
+      cron.schedule('0 8 * * *', () => {
+        console.log('[Cron] Running daily competitor tracker...');
+        runDailyTracker(process.env.TRACKER_USER_ID);
+      });
+      console.log('[Cron] Daily competitor tracker scheduled at 08:00');
+    }
+  });
+}).catch(err => {
+  console.error('Failed to initialize database:', err);
+  process.exit(1);
 });

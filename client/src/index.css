@@ -1,6 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 
 /* Plus/cross grid pattern for the outer page shell */
 body {
@@ -94,7 +97,7 @@ body::before {
 /* Display typography over hero */
 .pulse-hero-text {
   color: white;
-  font-family: 'Special Gothic', 'Playfair Display', Georgia, sans-serif;
+  font-family: 'Playfair Display', Georgia, serif;
   line-height: 1.05;
   text-align: center;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
@@ -267,8 +270,7 @@ body::before {
    Used on: /how-it-works, /hire-me, /byok
    ============================================ */
 
-/* Google Fonts — DM Mono for labels */
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
+
 
 /* Page wrapper — white with a very subtle dot-grid */
 .caret-page {
@@ -319,7 +321,7 @@ body::before {
 }
 
 .caret-section-title {
-  font-family: 'Special Gothic', sans-serif;
+  font-family: 'Playfair Display', Georgia, serif;
   font-size: 2.75rem;
   font-weight: 700;
   line-height: 1.15;
@@ -328,8 +330,7 @@ body::before {
 }
 
 .caret-section-title em {
-  font-style: normal;
-  font-weight: 400;
+  font-style: italic;
   color: #374151;
 }
 
@@ -538,11 +539,11 @@ body::before {
 }
 
 .caret-hero-name {
-  font-family: 'Special Gothic', sans-serif;
+  font-family: 'Playfair Display', serif;
   font-size: 3.5rem;
   font-weight: 700;
   color: #111827;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   line-height: 1.05;
   margin-bottom: 12px;
 }
@@ -557,9 +558,9 @@ body::before {
 }
 
 .caret-hero-quote {
-  font-family: 'Special Gothic', sans-serif;
-  font-size: 1.3rem;
-  font-weight: 400;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  font-style: italic;
   color: #374151;
   margin-bottom: 16px;
   line-height: 1.5;
@@ -637,7 +638,7 @@ body::before {
 }
 
 .caret-stat-val {
-  font-family: 'Special Gothic', sans-serif;
+  font-family: 'Playfair Display', serif;
   font-size: 2.5rem;
   font-weight: 700;
   color: #111827;
@@ -699,7 +700,7 @@ body::before {
 .caret-cta-text {
   padding: 56px 40px;
   border-right: 1px solid #e2e2e2;
-  font-family: 'Special Gothic', sans-serif;
+  font-family: 'Playfair Display', serif;
   font-size: 2.2rem;
   font-weight: 700;
   color: #111827;

@@ -5,17 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "echo 'No build step required'"
   },
   "dependencies": {
     "@qdrant/js-client-rest": "^1.13.0",
     "better-sqlite3": "^12.6.2",
+    "connect-pg-simple": "^10.0.0",
     "connect-sqlite3": "^0.9.16",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.0.1",
     "express-session": "^1.19.0",
     "node-cron": "^4.2.1",
+    "pg": "^8.20.0",
     "uuid": "^11.1.0"
   }
 }

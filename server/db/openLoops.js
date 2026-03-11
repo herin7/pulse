@@ -1,47 +1,33 @@
-import Database from 'better-sqlite3';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import pool from './postgres.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const db = new Database(join(__dirname, 'pulse.db'));
-
-db.pragma('journal_mode = WAL');
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS open_loops (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    userId TEXT NOT NULL,
-    loop TEXT NOT NULL,
-    source TEXT NOT NULL,
-    status TEXT DEFAULT 'open',
-    createdAt TEXT DEFAULT (datetime('now')),
-    closedAt TEXT
-  )
-`);
-
-export function insertLoop(userId, loop, source) {
-  const stmt = db.prepare(
-    'INSERT INTO open_loops (userId, loop, source) VALUES (?, ?, ?)'
+export async function insertLoop(userId, loop, source) {
+  const res = await pool.query(
+    'INSERT INTO open_loops ("userId", loop, source) VALUES ($1, $2, $3) RETURNING *',
+    [userId, loop, source]
   );
-  const result = stmt.run(userId, loop, source);
-  return db.prepare('SELECT * FROM open_loops WHERE id = ?').get(result.lastInsertRowid);
+  return res.rows[0];
 }
 
-export function getOpenLoops(userId) {
-  return db
-    .prepare('SELECT * FROM open_loops WHERE userId = ? AND status = ? ORDER BY createdAt DESC')
-    .all(userId, 'open');
+export async function getOpenLoops(userId) {
+  const res = await pool.query(
+    'SELECT * FROM open_loops WHERE "userId" = $1 AND status = $2 ORDER BY "createdAt" DESC',
+    [userId, 'open']
+  );
+  return res.rows;
 }
 
-export function findSimilarLoop(userId, loop) {
+export async function findSimilarLoop(userId, loop) {
   const prefix = loop.split(' ').slice(0, 5).join(' ') + '%';
-  return db
-    .prepare("SELECT * FROM open_loops WHERE userId = ? AND status = 'open' AND lower(loop) LIKE lower(?) LIMIT 1")
-    .get(userId, prefix);
+  const res = await pool.query(
+    "SELECT * FROM open_loops WHERE \"userId\" = $1 AND status = 'open' AND LOWER(loop) LIKE LOWER($2) LIMIT 1",
+    [userId, prefix]
+  );
+  return res.rows[0] || null;
 }
 
-export function closeLoop(userId, loopId) {
-  db.prepare(
-    "UPDATE open_loops SET status = 'closed', closedAt = datetime('now') WHERE id = ? AND userId = ?"
-  ).run(loopId, userId);
+export async function closeLoop(userId, loopId) {
+  await pool.query(
+    "UPDATE open_loops SET status = 'closed', \"closedAt\" = NOW() WHERE id = $1 AND \"userId\" = $2",
+    [loopId, userId]
+  );
 }
