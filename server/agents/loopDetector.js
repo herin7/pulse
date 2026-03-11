@@ -3,6 +3,20 @@ import { insertLoop, findSimilarLoop } from '../db/openLoops.js';
 
 const COMMITMENT_SIGNALS = ['need to', 'should', 'will', 'going to', 'plan to', 'want to', 'have to', 'must', 'gonna', 'tomorrow', 'this week'];
 
+function parseLoopArray(text) {
+  const trimmed = String(text || '').trim();
+  if (!trimmed) return [];
+
+  const arrayMatch = trimmed.match(/\[[\s\S]*\]/);
+  if (!arrayMatch) return [];
+
+  try {
+    return JSON.parse(arrayMatch[0]);
+  } catch {
+    return [];
+  }
+}
+
 export async function detectOpenLoops(userId, userMessage) {
   try {
     const lower = userMessage.toLowerCase();
@@ -15,7 +29,7 @@ export async function detectOpenLoops(userId, userMessage) {
       maxTokens: 200,
     });
 
-    const loops = JSON.parse(text.trim());
+    const loops = parseLoopArray(text);
 
     if (!Array.isArray(loops)) return [];
 

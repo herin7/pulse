@@ -1,5 +1,28 @@
 import { MODELS, DEFAULT_MODEL } from '../config/models.js';
 
+function normalizeMessageText(content) {
+  if (typeof content === 'string') {
+    return content.trim();
+  }
+
+  if (Array.isArray(content)) {
+    return content
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (typeof item?.text === 'string') return item.text;
+        return '';
+      })
+      .join('\n')
+      .trim();
+  }
+
+  if (typeof content?.text === 'string') {
+    return content.text.trim();
+  }
+
+  return '';
+}
+
 export async function callLLM({ modelKey, system, messages, maxTokens = 1000 }) {
   const key = modelKey || process.env.ACTIVE_MODEL || DEFAULT_MODEL;
   const config = MODELS[key];
@@ -16,7 +39,6 @@ export async function callLLM({ modelKey, system, messages, maxTokens = 1000 }) 
   let text;
 
   if (config.provider === 'anthropic') {
-    // FORMAT B — Anthropic
     const response = await fetch(config.endpoint, {
       method: 'POST',
       headers: {
@@ -38,14 +60,13 @@ export async function callLLM({ modelKey, system, messages, maxTokens = 1000 }) 
     }
 
     const data = await response.json();
-    text = data.content[0].text;
-  } else {
-    // FORMAT A — OpenAI-compatible (gemini, groq)
+    text = normalizeMessageText(data.content?.[0]?.text || data.content);
+  } else if (config.provider === 'sarvam') {
     const response = await fetch(config.endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        'api-subscription-key': apiKey,
       },
       body: JSON.stringify({
         model: config.model,
@@ -60,7 +81,32 @@ export async function callLLM({ modelKey, system, messages, maxTokens = 1000 }) 
     }
 
     const data = await response.json();
-    text = data.choices[0].message.content;
+    text = normalizeMessageText(data.choices?.[0]?.message?.content);
+  } else {
+    const response = await fetch(config.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: config.model,
+        max_tokens: maxTokens,
+        messages: [{ role: 'system', content: system }, ...messages],
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`${config.name} API error: ${err}`);
+    }
+
+    const data = await response.json();
+    text = normalizeMessageText(data.choices?.[0]?.message?.content);
+  }
+
+  if (!text) {
+    throw new Error(`${config.name} returned an empty response`);
   }
 
   return { text, modelUsed: config.name };

@@ -26,7 +26,6 @@ export async function ensureCollection() {
       wait: true,
     });
   } catch (e) {
-    // index already exists, ignore
   }
 
   try {
@@ -36,7 +35,6 @@ export async function ensureCollection() {
       wait: true,
     });
   } catch (e) {
-    // index already exists, ignore
   }
 }
 
@@ -53,6 +51,64 @@ export async function upsertChunks(userId, chunks) {
     },
   }));
   await client.upsert(COLLECTION, { wait: true, points });
+}
+
+export async function upsertChatMemory(userId, text, embedding) {
+  if (!text || !embedding) {
+    return;
+  }
+
+  await client.upsert(COLLECTION, {
+    wait: true,
+    points: [
+      {
+        id: uuidv4(),
+        vector: embedding,
+        payload: {
+          text,
+          userId,
+          chunkIndex: Date.now(),
+          source: 'chat_memory',
+          type: 'chunk',
+          memoryType: 'chat_message',
+          createdAt: new Date().toISOString(),
+        },
+      },
+    ],
+  });
+}
+
+export async function upsertDurableMemory(userId, facts, embedding) {
+  if (!Array.isArray(facts) || facts.length === 0 || !embedding) {
+    return;
+  }
+
+  const normalizedFacts = facts.map((fact) => fact.trim()).filter(Boolean);
+  if (normalizedFacts.length === 0) {
+    return;
+  }
+
+  const memoryText = normalizedFacts.join(' ');
+  const deterministicId = uuidv5(`${userId}:durable:${memoryText.toLowerCase()}`, NAMESPACE);
+
+  await client.upsert(COLLECTION, {
+    wait: true,
+    points: [
+      {
+        id: deterministicId,
+        vector: embedding,
+        payload: {
+          text: memoryText,
+          userId,
+          chunkIndex: Date.now(),
+          source: 'durable_memory',
+          type: 'chunk',
+          memoryType: 'durable_fact',
+          createdAt: new Date().toISOString(),
+        },
+      },
+    ],
+  });
 }
 
 export async function upsertCharacterCard(userId, card) {
@@ -72,7 +128,7 @@ export async function upsertCharacterCard(userId, card) {
 export async function searchSimilar(userId, queryEmbedding, topK = 5) {
   const results = await client.search(COLLECTION, {
     vector: queryEmbedding,
-    limit: topK,
+    limit: Math.max(topK * 3, 8),
     filter: {
       must: [
         { key: 'userId', match: { value: userId } },
@@ -81,11 +137,26 @@ export async function searchSimilar(userId, queryEmbedding, topK = 5) {
     },
     with_payload: true,
   });
-  return results.map((r) => ({
-    text: r.payload.text,
-    score: r.score,
-    source: r.payload.source,
-  }));
+  return results
+    .map((r) => {
+      const source = r.payload.source;
+      const memoryType = r.payload.memoryType;
+      let scoreBoost = 0;
+
+      if (memoryType === 'durable_fact' || source === 'durable_memory') {
+        scoreBoost += 0.12;
+      } else if (memoryType === 'chat_message' || source === 'chat_memory') {
+        scoreBoost += 0.06;
+      }
+
+      return {
+        text: r.payload.text,
+        score: r.score + scoreBoost,
+        source,
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, topK);
 }
 
 export async function getCharacterCard(userId) {

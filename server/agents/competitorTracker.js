@@ -69,7 +69,7 @@ ${combined}`,
 
   if (!parsed.summary) return;
 
-  insertIntel(
+  await insertIntel(
     userId,
     competitor.id,
     competitor.name,
@@ -81,7 +81,7 @@ ${combined}`,
 }
 
 export async function fetchCompetitorIntel(userId) {
-  const competitors = getCompetitors(userId);
+  const competitors = (await getCompetitors(userId)) || [];
 
   const results = await Promise.allSettled(
     competitors.map((c) => processCompetitor(userId, c))

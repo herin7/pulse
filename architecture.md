@@ -2,6 +2,20 @@
 
 ## High-Level Overview
 
+## Latest Feature Update (March 11, 2026)
+
+Pulse now includes a small voice-cofounder loop in the chat experience:
+
+- Browser speech recognition lets the founder give a spoken standup from the chat composer.
+- Pulse speaks its reply aloud using browser speech synthesis and the best available English voice.
+- Spoken updates render a standup summary card with `moved`, `stalled`, and `next`.
+- Messages that match `Remind me to ... at HH:MM` create stored reminders and later surface as in-app popups.
+- Email requests now route into a draft-first Gmail flow: Pulse generates a polished email draft, renders it in a dedicated approval card, and only sends immediately or schedules delivery after explicit user action.
+- Pulse now includes an `Agent Setup` surface where founders configure a primary agent's identity, BYOK settings, email identities, automation preferences, and extra operating context.
+- Gmail can now be connected per user from Agent Setup through a Google OAuth popup, so email sending no longer has to rely on one shared refresh token.
+
+This feature was added without replacing the existing RAG chat, open-loop accountability, or competitor-intel systems.
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        MONOREPO (npm workspaces)                │
@@ -291,3 +305,115 @@ Three tools available for function calling:
 1. `close_loop` — Mark an open loop as completed
 2. `add_competitor` — Add a competitor to track
 3. `get_competitor_intel` — Retrieve recent competitive intelligence
+
+## Voice And Reminder Flow
+
+### Voice Standup
+
+Client flow:
+1. User presses the mic button in chat.
+2. Browser `SpeechRecognition` / `webkitSpeechRecognition` captures one spoken update.
+3. The transcript is injected into the composer and auto-sent through the normal `/api/chat` flow.
+4. The client creates a lightweight standup summary card using sentence heuristics:
+   - `moved`
+   - `stalled`
+   - `next`
+5. When the assistant reply returns, the client speaks it aloud with `speechSynthesis`.
+
+### Timed Reminders
+
+Server flow:
+1. `POST /api/chat` still generates the normal assistant reply.
+2. The same route also parses messages that look like `Remind me to ... at 22:06`.
+3. Matching reminders are inserted into the `reminders` PostgreSQL table with `pending` status.
+4. The client polls `/api/reminders/due`.
+5. Due reminders are marked `delivered`, shown as modal-style popups, and may also raise browser notifications.
+
+## Email Draft And Scheduling Flow
+
+### Draft-first Gmail approval
+
+Server flow:
+1. `POST /api/chat` detects email intents such as `send email`, `draft mail`, or typo variants like `mial`.
+2. The email drafting agent turns the user's rough request into a polished `to / subject / body` draft.
+3. The route returns normal assistant text plus a structured `emailDraft` payload.
+4. The client shows that payload in a dedicated email-review card instead of sending immediately.
+
+Client flow:
+1. Founder reviews and edits the drafted recipient, subject, and body.
+2. Founder chooses either `Send now` or `Schedule`.
+3. `Send now` calls `/api/gmail/send` and logs the action in PostgreSQL.
+4. `Schedule` calls `/api/gmail/schedule`, stores the pending email in PostgreSQL, and the server sends it later through Gmail.
+
+Background delivery:
+- A lightweight server-side email scheduler checks due `scheduled` email actions every 30 seconds.
+- Due emails are sent through Gmail OAuth and marked `sent`; failures are marked `failed`.
+
+## Agent Setup Architecture
+
+### UI sections
+
+The new `/agent-setup` screen is split into six product sections:
+- Agent Identity
+- Founder Context
+- Email Setup
+- BYOK
+- Automation Preferences
+- Agent Fleet (future agents shown as coming soon)
+
+### Persistence
+
+Primary agent setup is stored per authenticated user in MongoDB through the `AgentProfile` model. The document shape is:
+- `identity`
+- `emails`
+- `byok`
+- `context`
+- `automation`
+
+### API routes
+
+- `GET /api/agent-setup`
+  Loads the saved primary-agent profile, debug status, and future-agent placeholders.
+- `PUT /api/agent-setup`
+  Saves the full primary-agent profile.
+- `POST /api/agent-setup/reset`
+  Resets either the full setup or only the context section.
+- `GET /api/agent-setup/gmail/connect-url`
+  Creates a signed Google OAuth URL for the authenticated user.
+- `GET /api/agent-setup/gmail/callback`
+  Exchanges the Google auth code, stores the refresh token in the user's primary-agent profile, and notifies the setup popup.
+- `POST /api/agent-setup/gmail/disconnect`
+  Removes the user's connected Gmail sender.
+
+### Chat flow changes
+
+`POST /api/chat` now also loads the saved primary-agent profile. When present, the prompt receives:
+- agent identity and tone
+- startup context and operating instructions
+- email identities and approval mode
+- automation preferences
+
+This means the same founder profile now gets combined with a configurable operating profile before the LLM answers.
+
+### Email sending changes
+
+Draft send and scheduled send now resolve Gmail credentials in this order:
+1. user-connected Gmail account from `AgentProfile.gmailConnection`
+2. global server fallback from `.env`
+
+### New Files Added
+
+- `server/agents/reminderParser.js`
+- `server/agents/emailScheduler.js`
+- `server/db/models/AgentProfile.js`
+- `server/db/reminders.js`
+- `server/routes/reminders.js`
+- `server/routes/agentSetup.js`
+
+### Main UI Surface Updated
+
+- `client/src/Chat.jsx`
+  - voice mic button
+  - spoken Pulse replies
+  - voice standup summary card
+  - reminder toast + popup delivery

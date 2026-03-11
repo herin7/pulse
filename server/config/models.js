@@ -2,7 +2,7 @@ export const MODELS = {
   gemini: {
     name: "Gemini 2.0 Flash",
     provider: "google",
-    model: "gemini-2.0-flash",
+    model: "gemini-2.0-flash-lite",
     endpoint: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
     apiKeyEnv: "GEMINI_API_KEY",
     free: true,
@@ -14,6 +14,14 @@ export const MODELS = {
     endpoint: "https://api.groq.com/openai/v1/chat/completions",
     apiKeyEnv: "GROQ_API_KEY",
     free: true,
+  },
+  sarvam: {
+    name: "Sarvam 105B",
+    provider: "sarvam",
+    model: "sarvam-105b",
+    endpoint: "https://api.sarvam.ai/v1/chat/completions",
+    apiKeyEnv: "SARVAM_API_KEY",
+    free: false,
   },
   claude: {
     name: "Claude Sonnet (Anthropic)",

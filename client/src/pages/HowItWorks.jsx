@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 
-/* ─── reusable panel atoms ─── */
 function PanelHeader({ index, label, category }) {
     return (
         <div className="caret-panel-header">
@@ -18,7 +17,6 @@ function SectionTitle({ children }) {
     );
 }
 
-/* ─── steps data ─── */
 const steps = [
     {
         icon: '◎',

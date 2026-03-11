@@ -28,9 +28,24 @@
 
 **Pulse** (internally: "Life Cofounder") is an AI-powered cofounder tool for startup founders. It ingests a founder's data from three sources (LLM self-report, LinkedIn profile, GitHub activity), builds a vector-searchable knowledge base, generates a detailed founder profile ("character card"), and provides a RAG-powered chat interface that acts as a direct, opinionated AI cofounder.
 
+### Latest Feature Update (March 11, 2026)
+
+Pulse now also supports a small demo-ready voice cofounder workflow:
+
+- `Voice standup input` from the chat composer using browser speech recognition
+- `Pulse voice output` using browser speech synthesis so the assistant speaks back
+- `Voice standup summary card` that highlights what moved, what stalled, and what is next
+- `Timed reminder popups` for messages like `Remind me to go to office at 22:06`
+- `Draft-first Gmail flow` that drafts a polished email, renders it in a dedicated review card, and lets the founder send now or schedule delivery
+- `Agent Setup page` where the founder configures a primary agent's identity, BYOK keys, email identities, operating context, and automation preferences
+- `Per-user Gmail connect` from Agent Setup, so the logged-in founder can connect a dedicated Gmail sender with a popup instead of sharing one global refresh token
+
 Beyond chat, Pulse tracks:
 - **Open loops** — commitments the founder makes during conversation, automatically extracted and surfaced when relevant.
 - **Competitive intelligence** — daily automated web searches about tracked competitors, LLM-summarized with urgency ratings, injected into chat context.
+- **Reminders** — time-based commitments stored server-side and delivered back to the UI as in-app popups.
+- **Email actions** — sent and scheduled Gmail messages stored in PostgreSQL for later delivery and auditability.
+- **Agent setup** — one primary configurable agent stored per user in MongoDB, with future multi-agent support shown in the UI as coming soon.
 
 ### Core Product Flow
 
@@ -108,9 +123,15 @@ File: `server/.env` (not committed). Template: `server/.env.example`
 | `SESSION_SECRET`  | No       | express-session secret. Default: `pulse-dev-secret`            |
 | `SERPER_API_KEY`  | Yes**    | Serper.dev API key for competitor search                       |
 | `TRACKER_USER_ID` | No       | UUID of user whose competitors to track via daily cron         |
+| `GMAIL_CLIENT_ID` | No***    | Google OAuth client ID for the Pulse Gmail account             |
+| `GMAIL_CLIENT_SECRET` | No*** | Google OAuth client secret for Gmail sending                  |
+| `GMAIL_REDIRECT_URI` | No*** | OAuth redirect URI used to mint the Gmail refresh token        |
+| `GMAIL_REFRESH_TOKEN` | No*** | Offline refresh token for the Pulse Gmail account             |
+| `GMAIL_SENDER_EMAIL` | No*** | Gmail address Pulse sends from                                 |
 
 \* At least the key for the active model must be set.
 \** Required only if using competitor tracking.
+\*** Required only if using the Gmail send/schedule flow.
 
 The `.env` also contains commented-out placeholders for future integrations: `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REDIRECT_URI`, `GMAIL_REFRESH_TOKEN`, `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET`.
 
@@ -272,14 +293,21 @@ Displays the full character card with styled sections:
 - Auto-scroll to bottom on new messages
 - Loading indicator: "Thinking..." in zinc bubble while waiting
 - Enter sends, Shift+Enter for newlines
+- Voice standup card appears above the message list
+- Mic button in the composer can capture one spoken update using browser speech recognition
+- Assistant replies can be read aloud using browser speech synthesis
+- Reminder popups appear as overlay cards when due reminders are delivered
 
 **Message flow:**
 1. User types message + presses Enter
 2. Message added to local state immediately
 3. `embed(text)` generates query embedding in browser
-4. `POST /api/chat` with: message, userId, queryEmbedding, last 10 messages as history
+4. `POST /api/chat` with: message, queryEmbedding, last 10 messages as history
 5. On success: assistant message + sources added to state
-6. On error: "Something went wrong. Try again." shown as assistant message
+6. If the user message was spoken, a local standup summary card is generated (`moved`, `stalled`, `next`)
+7. If a reminder was parsed server-side, the UI shows a reminder-set toast and schedules popup delivery
+8. If voice output is enabled, the assistant reply is spoken aloud
+9. On error: "Something went wrong. Try again." shown as assistant message
 
 All fetches include `credentials: 'include'` for session cookies.
 
@@ -431,6 +459,17 @@ Sentence-aware text chunking with overlap for RAG.
 
 ## 6. Routes — API Endpoints
 
+### Agent Setup Routes
+
+| Route | Method | Purpose |
+|-------|--------|---------|
+| `/api/agent-setup` | `GET` | Load the primary agent profile, debug state, and future-agent placeholders |
+| `/api/agent-setup` | `PUT` | Save the primary agent profile from the setup UI |
+| `/api/agent-setup/reset` | `POST` | Reset either the full setup or only the context section |
+| `/api/agent-setup/gmail/connect-url` | `GET` | Generate a signed Google OAuth URL for Gmail connect |
+| `/api/agent-setup/gmail/callback` | `GET` | Complete Gmail OAuth and persist the user's connected sender |
+| `/api/agent-setup/gmail/disconnect` | `POST` | Remove the connected Gmail sender from the primary agent profile |
+
 ### 6.1 POST /api/ingest
 
 **File:** `server/routes/ingest.js`
@@ -524,14 +563,13 @@ Sentence-aware text chunking with overlap for RAG.
 ```json
 {
   "message": "string",
-  "userId": "uuid",
   "queryEmbedding": [0.1, ...],
   "history": [{ "role": "user|assistant", "content": "..." }]
 }
 ```
 
 **Process:**
-1. Validate `userId`, `message`, `queryEmbedding` all present
+1. Resolve `userId` from authenticated user, validate `message` and `queryEmbedding`
 2. Parallel fetch: `searchSimilar(userId, vec, 5)` + `getCharacterCard(userId)`
 3. If no character card: return 404
 4. Build context string from relevant chunks: `[source]: text`
@@ -543,14 +581,21 @@ Sentence-aware text chunking with overlap for RAG.
 7. Build system prompt with: character prompt, founder profile, context, open loops, intel
 8. Clean history: strip to `{ role, content }` only (removes `sources` field from client)
 9. Call LLM with system prompt + history + current message, maxTokens = 1000
-10. Return `{ reply, sources }`
-11. Fire-and-forget: `detectOpenLoops(userId, message)` — extracts commitments asynchronously
+10. Parse reminder-shaped messages with `parseReminderMessage(message)`
+11. If parsed, insert a pending reminder into PostgreSQL
+12. Return `{ reply, sources, reminder }`
+13. Fire-and-forget: `detectOpenLoops(userId, message)` — extracts commitments asynchronously
 
 **Response:**
 ```json
 {
   "reply": "string",
-  "sources": ["linkedin", "github", ...]
+  "sources": ["linkedin", "github", ...],
+  "reminder": {
+    "id": 1,
+    "task": "go to office",
+    "remindAt": "2026-03-11T16:36:00.000Z"
+  }
 }
 ```
 
@@ -654,6 +699,38 @@ CREATE TABLE IF NOT EXISTS open_loops (
 - `getOpenLoops(userId)` — Get all open loops for user, ordered by createdAt DESC
 - `findSimilarLoop(userId, loop)` — Check for duplicate by matching first 5 words (LIKE pattern) against existing open loops
 - `closeLoop(userId, loopId)` — Set status='closed' and closedAt=now
+
+#### reminders table
+
+**Schema:**
+```sql
+CREATE TABLE IF NOT EXISTS reminders (
+  id SERIAL PRIMARY KEY,
+  "userId" TEXT NOT NULL,
+  task TEXT NOT NULL,
+  source TEXT NOT NULL,
+  "remindAt" TIMESTAMP NOT NULL,
+  status TEXT DEFAULT 'pending',
+  "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  "deliveredAt" TIMESTAMP
+)
+```
+
+**Functions:**
+- `insertReminder(userId, task, remindAt, source)` — Insert a pending timed reminder
+- `getDueReminders(userId)` — Mark all due pending reminders as delivered and return them to the client
+
+#### agent_profiles collection (MongoDB)
+
+**Model:** `server/db/models/AgentProfile.js`
+
+**Top-level shape:**
+- `userId` — one primary agent profile per authenticated user
+- `identity` — name, role, tone, voice style, signature, responsibility
+- `emails` — user email, agent email, reply-to email, approval mode
+- `byok` — active model plus stored personal provider keys
+- `context` — founder/startup context, goals, constraints, instructions, reset notes
+- `automation` — autonomy toggles, quiet hours, reminder intensity, escalation behavior
 
 #### competitors table
 
