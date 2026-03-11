@@ -24,7 +24,7 @@ function NavBar() {
                     <rect x="16" y="23" width="5" height="5" rx="1" fill="#1a1a1a" />
                     <rect x="23" y="23" width="5" height="5" rx="1" fill="#1a1a1a" />
                 </svg>
-                <span className="font-serif text-base font-semibold text-neutral-800 tracking-tight">Pulse</span>
+                <span className="font-semibold text-neutral-900 tracking-tight" style={{ fontFamily: "'Special Gothic', sans-serif", fontSize: '1.1rem' }}>Pulse</span>
             </Link>
 
             {/* Center nav */}
@@ -38,8 +38,8 @@ function NavBar() {
                         key={to}
                         to={to}
                         className={`px-4 py-1.5 rounded-full text-sm transition-all ${isActive(to)
-                                ? 'bg-neutral-900 text-white font-medium'
-                                : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100'
+                            ? 'bg-neutral-900 text-white font-medium'
+                            : 'text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100'
                             }`}
                     >
                         {label}

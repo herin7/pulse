@@ -53,9 +53,9 @@ export default function Onboarding({ onSubmit }) {
 
           {/* Centered hero text — matches screenshot */}
           <div className="pulse-hero-text">
-            <div className="text-[2.4rem] font-serif font-normal tracking-tight">Work.</div>
-            <div className="text-[5rem] font-serif italic leading-none -mt-2">Create.</div>
-            <div className="text-[2rem] font-serif font-semibold mt-0.5 tracking-wide">Build.</div>
+            <div style={{ fontFamily: "'Special Gothic', sans-serif", fontSize: '2.4rem', fontWeight: 700, letterSpacing: '-0.01em' }}>Work.</div>
+            <div style={{ fontFamily: "'Special Gothic', serif", fontSize: '5rem', fontWeight: 700, lineHeight: 1, marginTop: '-6px' }}>Create.</div>
+            <div style={{ fontFamily: "'Special Gothic', sans-serif", fontSize: '2rem', fontWeight: 600, marginTop: '2px', letterSpacing: '0.01em' }}>Build.</div>
           </div>
 
           {/* Subtitle + CTAs */}
