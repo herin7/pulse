@@ -37,14 +37,14 @@ body::before {
   max-width: 720px;
   min-height: 82vh;
   margin: 0 auto;
-  border-radius: 20px;
-  border: 1.5px solid rgba(200, 210, 200, 0.55);
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.06),
-    0 12px 48px rgba(0, 0, 0, 0.10);
-  overflow: hidden;
-  background: white;
-}
+    min-height: calc(100vh - 64px); /* 64px is navbar height, adjust if needed */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 40px;
+  }
 
 .pulse-card-chat {
   width: 88%;
@@ -1441,7 +1441,7 @@ body::before {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 0 40px;
+  padding: 120px 40px 60px;
 }
 
 .landing-title {
