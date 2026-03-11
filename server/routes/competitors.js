@@ -1,25 +1,24 @@
 import { Router } from 'express';
 import { getCompetitors, getIntelByCompetitor } from '../db/competitors.js';
 import { fetchCompetitorIntel } from '../agents/competitorTracker.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-router.post('/refresh', (req, res) => {
-  const userId = req.session.userId;
-  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+router.post('/refresh', requireAuth, (req, res) => {
+  const userId = req.user.id;
 
   fetchCompetitorIntel(userId).catch(console.error);
   res.json({ success: true });
 });
 
-router.get('/status', (req, res) => {
-  const userId = req.session.userId;
-  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+router.get('/status', requireAuth, async (req, res) => {
+  const userId = req.user.id;
 
-  const competitors = getCompetitors(userId);
+  const competitors = (await getCompetitors(userId)) || [];
 
-  const result = competitors.map((c) => {
-    const intel = getIntelByCompetitor(userId, c.id);
+  const result = await Promise.all(competitors.map(async (c) => {
+    const intel = await getIntelByCompetitor(userId, c.id);
     const latest = intel[0] || null;
     return {
       name: c.name,
@@ -28,7 +27,7 @@ router.get('/status', (req, res) => {
       urgency: latest?.urgency || null,
       category: latest?.category || null,
     };
-  });
+  }));
 
   res.json({
     competitors: result,

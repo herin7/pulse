@@ -3,10 +3,13 @@ import { createSlice } from '@reduxjs/toolkit';
 const appSlice = createSlice({
     name: 'app',
     initialState: {
-        screen: 'onboarding',      // 'onboarding' | 'ingesting' | 'chat'
+        screen: 'onboarding',
         formData: null,
         characterCard: null,
         sessionChecked: false,
+        user: null,
+        token: null,
+        authModalOpen: false,
     },
     reducers: {
         setScreen(state, action) {
@@ -19,7 +22,6 @@ const appSlice = createSlice({
             state.characterCard = action.payload;
         },
         sessionLoaded(state, action) {
-            // action.payload = { exists, userId, characterCard }
             state.sessionChecked = true;
             if (action.payload.exists) {
                 state.characterCard = action.payload.characterCard;
@@ -31,6 +33,15 @@ const appSlice = createSlice({
             state.formData = null;
             state.characterCard = null;
             state.sessionChecked = false;
+            state.user = null;
+            state.token = null;
+        },
+        setAuth(state, action) {
+            state.user = action.payload.user;
+            state.token = action.payload.token;
+        },
+        setAuthModal(state, action) {
+            state.authModalOpen = action.payload;
         },
     },
 });
@@ -41,6 +52,8 @@ export const {
     setCharacterCard,
     sessionLoaded,
     resetSession,
+    setAuth,
+    setAuthModal,
 } = appSlice.actions;
 
 export default appSlice.reducer;

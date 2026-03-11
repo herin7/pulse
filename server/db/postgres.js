@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import pg from 'pg';
+
 const { Pool } = pg;
 
 if (!process.env.DATABASE_URL) {
@@ -22,13 +23,12 @@ export async function query(text, params) {
   return await pool.query(text, params);
 }
 
-// ── INITIALIZE TABLES ────────────────────────────────────────────────────────
 export async function initDb() {
   const client = await pool.connect();
+
   try {
     await client.query('BEGIN');
 
-    // Competitors Table (using quotes for camelCase compatibility)
     await client.query(`
       CREATE TABLE IF NOT EXISTS competitors (
         id SERIAL PRIMARY KEY,
@@ -39,7 +39,6 @@ export async function initDb() {
       )
     `);
 
-    // Competitor Intel Table
     await client.query(`
       CREATE TABLE IF NOT EXISTS competitor_intel (
         id SERIAL PRIMARY KEY,
@@ -54,7 +53,6 @@ export async function initDb() {
       )
     `);
 
-    // Open Loops Table
     await client.query(`
       CREATE TABLE IF NOT EXISTS open_loops (
         id SERIAL PRIMARY KEY,
@@ -67,7 +65,52 @@ export async function initDb() {
       )
     `);
 
-    // Session Table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS reminders (
+        id SERIAL PRIMARY KEY,
+        "userId" TEXT NOT NULL,
+        task TEXT NOT NULL,
+        source TEXT NOT NULL,
+        "remindAt" TIMESTAMP NOT NULL,
+        status TEXT DEFAULT 'pending',
+        "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        "deliveredAt" TIMESTAMP
+      )
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS email_actions (
+        id SERIAL PRIMARY KEY,
+        "userId" TEXT NOT NULL,
+        "toEmail" TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        body TEXT NOT NULL,
+        status TEXT NOT NULL,
+        "providerMessageId" TEXT,
+        "threadId" TEXT,
+        source TEXT NOT NULL,
+        "scheduledFor" TIMESTAMP,
+        "sentAt" TIMESTAMP,
+        "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await client.query(`
+      ALTER TABLE email_actions
+      ADD COLUMN IF NOT EXISTS "scheduledFor" TIMESTAMP
+    `);
+
+    await client.query(`
+      ALTER TABLE email_actions
+      ADD COLUMN IF NOT EXISTS "sentAt" TIMESTAMP
+    `);
+
+    await client.query(`
+      ALTER TABLE email_actions
+      ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    `);
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS "session" (
         "sid" varchar NOT NULL COLLATE "default",

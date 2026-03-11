@@ -7,7 +7,6 @@ const store = configureStore({
         app: appReducer,
         chat: chatReducer,
     },
-    // RTK already includes redux-thunk by default
     devTools: import.meta.env.DEV,
 });
 

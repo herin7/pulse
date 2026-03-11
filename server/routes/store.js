@@ -1,37 +1,38 @@
 import { Router } from 'express';
 import { ensureCollection, upsertChunks, upsertCharacterCard } from '../db/qdrant.js';
 import { callLLM } from '../utils/llmCall.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-router.post('/api/store', async (req, res) => {
+router.post('/api/store', requireAuth, async (req, res) => {
   try {
-    const { chunks, userId } = req.body;
+    const { chunks } = req.body;
+    const userId = req.user.id;
 
-    if (!userId || !chunks) {
-      return res.status(400).json({ error: 'userId and chunks are required' });
+    if (!chunks) {
+      return res.status(400).json({ error: 'chunks are required' });
     }
 
     await ensureCollection();
     await upsertChunks(userId, chunks);
 
-    // Take 5 chunks from each source for balanced synthesis
     const bySource = {};
-    chunks.forEach((c) => {
-      if (!bySource[c.source]) bySource[c.source] = [];
-      bySource[c.source].push(c);
+    chunks.forEach((chunk) => {
+      if (!bySource[chunk.source]) bySource[chunk.source] = [];
+      bySource[chunk.source].push(chunk);
     });
-    const balanced = Object.values(bySource)
-      .flatMap((arr) => arr.sort((a, b) => a.chunkIndex - b.chunkIndex).slice(0, 5));
-    const synthesisContext = balanced.map((c) => `[${c.source}]: ${c.text}`).join('\n\n');
 
-    // Call LLM for character card generation
+    const balanced = Object.values(bySource)
+      .flatMap((items) => items.sort((a, b) => a.chunkIndex - b.chunkIndex).slice(0, 5));
+    const synthesisContext = balanced.map((chunk) => `[${chunk.source}]: ${chunk.text}`).join('\n\n');
+
     const { text: rawText } = await callLLM({
       system: 'You are a founder talent analyst who has evaluated 1000+ early-stage founders. You write profiles that are specific enough that if you swapped the name, a reader could NOT confuse this person with any other founder. Vague phrases like "passionate about technology" or "strong communicator" are forbidden. Every field must contain a concrete, verifiable observation. Output ONLY valid JSON with no commentary.',
       messages: [
         {
           role: 'user',
-          content: `Here is raw data about a founder — their self-report, LinkedIn, and GitHub activity. Extract a founder profile. Be a mirror, not a cheerleader. Identify what they are actually doing vs what they say they want to do. Note gaps between ambition and current output. Output this exact JSON:
+          content: `Here is raw data about a founder - their self-report, LinkedIn, and GitHub activity. Extract a founder profile. Be a mirror, not a cheerleader. Identify what they are actually doing vs what they say they want to do. Note gaps between ambition and current output. Output this exact JSON:
 {
   "name": string,
   "founderType": string,
@@ -48,7 +49,7 @@ router.post('/api/store', async (req, res) => {
 
 Guidelines:
 - founderType: e.g. "Technical solo founder", "Second-time operator"
-- stage: e.g. "Pre-product", "0→1", "Early traction"
+- stage: e.g. "Pre-product", "0->1", "Early traction"
 - founderStrengths: top 3, founder-specific behavior patterns (e.g. "Ships fast without overthinking")
 - blindspots: brutal and specific to their founder journey, not generic advice
 - biggestRisk: the single most likely reason this startup fails

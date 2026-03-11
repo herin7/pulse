@@ -1,15 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import useEmbeddings from './useEmbeddings';
 
-function getUserId() {
-  let id = localStorage.getItem('lc_user_id');
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem('lc_user_id', id);
-  }
-  return id;
-}
-
 export default function IngestFlow({ formData, onComplete }) {
   const { isReady, embed } = useEmbeddings();
   const [step, setStep] = useState('loading_model');
@@ -19,71 +10,74 @@ export default function IngestFlow({ formData, onComplete }) {
 
   const run = useCallback(async () => {
     setError(null);
-    const userId = getUserId();
+    const token = localStorage.getItem('pulse_token');
 
     try {
-      // Step A — Ingest
       setStep('Fetching GitHub data...');
       setProgress(5);
 
       const ingestRes = await fetch('/api/ingest', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
         credentials: 'include',
-        body: JSON.stringify({ ...formData, userId }),
+        body: JSON.stringify({ ...formData }),
       });
 
       if (!ingestRes.ok) throw new Error('Ingest request failed');
       const { chunks, warnings } = await ingestRes.json();
+
       if (warnings && Array.isArray(warnings) && warnings.length) {
-        warnings.forEach((w) => console.warn('[Ingest]', w));
+        warnings.forEach((warning) => console.warn('[Ingest]', warning));
         setStep(warnings[0]);
-        await new Promise((r) => setTimeout(r, 2500));
+        await new Promise((resolve) => setTimeout(resolve, 2500));
       } else if (warnings && typeof warnings === 'string') {
         console.warn('[Ingest]', warnings);
         setStep(warnings);
-        await new Promise((r) => setTimeout(r, 2500));
+        await new Promise((resolve) => setTimeout(resolve, 2500));
       }
+
       setProgress(15);
 
-      // Step B — Generate embeddings in batches of 5
       const embeddedChunks = [];
       const total = chunks.length;
 
-      for (let i = 0; i < total; i += 5) {
-        const batch = chunks.slice(i, i + 5);
-        const embeddings = await Promise.all(batch.map((c) => embed(c.text)));
+      for (let index = 0; index < total; index += 5) {
+        const batch = chunks.slice(index, index + 5);
+        const embeddings = await Promise.all(batch.map((chunk) => embed(chunk.text)));
 
-        for (let j = 0; j < batch.length; j++) {
+        for (let offset = 0; offset < batch.length; offset += 1) {
           embeddedChunks.push({
-            text: batch[j].text,
-            source: batch[j].source,
-            chunkIndex: batch[j].index,
-            embedding: embeddings[j],
+            text: batch[offset].text,
+            source: batch[offset].source,
+            chunkIndex: batch[offset].index,
+            embedding: embeddings[offset],
           });
         }
 
-        const done = Math.min(i + 5, total);
+        const done = Math.min(index + 5, total);
         setStep(`Generating embeddings (${done}/${total})...`);
         setProgress(15 + Math.round((done / total) * 65));
       }
 
-      // Step C — Store
       setStep('Building your character card...');
       setProgress(85);
 
       const storeRes = await fetch('/api/store', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
         credentials: 'include',
-        body: JSON.stringify({ chunks: embeddedChunks, userId }),
+        body: JSON.stringify({ chunks: embeddedChunks }),
       });
 
       if (!storeRes.ok) throw new Error('Store request failed');
       const { characterCard } = await storeRes.json();
       setProgress(100);
-
-      // Step D — Done
       onComplete(characterCard);
     } catch (err) {
       console.error('IngestFlow error:', err);
@@ -103,9 +97,7 @@ export default function IngestFlow({ formData, onComplete }) {
   return (
     <div className="min-h-screen flex items-center justify-center pt-16">
       <div className="pulse-card flex flex-col">
-        {/* Hero area with progress overlay */}
         <div className="pulse-card-hero">
-          {/* Corner dots */}
           <div className="pulse-corner-dot" style={{ top: 16, left: 16 }} />
           <div className="pulse-corner-dot" style={{ top: 16, right: 16 }} />
           <div className="pulse-corner-dot" style={{ bottom: 16, left: 16 }} />
@@ -116,7 +108,6 @@ export default function IngestFlow({ formData, onComplete }) {
             <div className="text-base font-sans font-light opacity-70 mt-3">Your profile is being created</div>
           </div>
 
-          {/* Progress bar overlaid on hero */}
           {!error && (
             <div className="absolute bottom-6 left-8 right-8">
               <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
@@ -129,7 +120,6 @@ export default function IngestFlow({ formData, onComplete }) {
           )}
         </div>
 
-        {/* Content area */}
         <div className="px-8 py-8 flex-1 flex flex-col items-center justify-center">
           <p className="text-neutral-600 text-sm mb-4">{error ? '' : stepLabel}</p>
 

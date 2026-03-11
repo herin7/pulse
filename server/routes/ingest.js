@@ -1,19 +1,17 @@
 import { Router } from 'express';
 import { chunkText } from '../utils/chunkText.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-router.post('/api/ingest', async (req, res) => {
+router.post('/api/ingest', requireAuth, async (req, res) => {
   try {
-    const { llmDump, linkedinPaste, githubUsername, userId } = req.body;
+    const { llmDump, linkedinPaste, githubUsername } = req.body;
+    const userId = req.user.id;
 
-    if (!userId) {
-      return res.status(400).json({ error: 'userId is required' });
-    }
-
-    // Fetch GitHub data
     let githubText = '';
     let githubFailed = false;
+
     if (githubUsername) {
       try {
         const headers = { 'User-Agent': 'life-cofounder-app' };
@@ -30,16 +28,16 @@ router.post('/api/ingest', async (req, res) => {
           const allRepos = allReposRes.ok ? await allReposRes.json() : [];
 
           const repoList = starredRepos
-            .map((r) => `${r.name} (${r.language || 'unknown'}, ${r.stargazers_count} stars): ${r.description || 'no description'}`)
+            .map((repo) => `${repo.name} (${repo.language || 'unknown'}, ${repo.stargazers_count} stars): ${repo.description || 'no description'}`)
             .join('; ');
 
-          // Aggregate top 5 languages by repo count
           const langCounts = {};
-          for (const r of allRepos) {
-            if (r.language) {
-              langCounts[r.language] = (langCounts[r.language] || 0) + 1;
+          for (const repo of allRepos) {
+            if (repo.language) {
+              langCounts[repo.language] = (langCounts[repo.language] || 0) + 1;
             }
           }
+
           const topLangs = Object.entries(langCounts)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5)
@@ -57,16 +55,14 @@ router.post('/api/ingest', async (req, res) => {
       }
     }
 
-    // Combine all text sources
     const corpus = [
       { text: llmDump || '', source: 'ai_self_report' },
       { text: linkedinPaste || '', source: 'linkedin' },
       { text: githubText, source: 'github' },
     ];
 
-    // Chunk each source
     const allChunks = corpus.flatMap(({ text, source }) =>
-      text ? chunkText(text).map((c) => ({ ...c, source })) : []
+      text ? chunkText(text).map((chunk) => ({ ...chunk, source })) : []
     );
 
     req.session.userId = userId;
