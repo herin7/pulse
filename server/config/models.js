@@ -2,7 +2,7 @@ export const MODELS = {
   gemini: {
     name: "Gemini 2.0 Flash",
     provider: "google",
-    model: "gemini-2.0-flash-lite",
+    model: "gemini-2.5-flash-lite",
     endpoint: "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
     apiKeyEnv: "GEMINI_API_KEY",
     free: true,
