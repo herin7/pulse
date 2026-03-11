@@ -1,11 +1,7 @@
 # Pulse 
 ### Personal Intelligence for Founders Who Can't Afford to Forget
 
-> Built in 24 hours by a 3rd year CS student.
-> Not a side project. A statement.
-> : Herin Soni, LDCE Ahmedabad
 
----
 
 ## 📺 Demo
 
