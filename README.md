@@ -361,8 +361,6 @@ Add thoughts between meetings from your phone.
 
 ## Honest Assessment
 
-This is a 24-hour build by a single developer.
-
 What it has : a working RAG pipeline, real vector search, multi-source ingestion, competitor intel on a daily cron, Gmail draft and schedule flow, voice input and output, open loop extraction, multi-LLM runtime switching, and an architecture that scales.
 
 What it doesn't have yet : the roadmap above.
