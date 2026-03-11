@@ -26,7 +26,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173', 'https://pulse-client-olive.vercel.app'],
   credentials: true,
 }));
 app.use(morgan('dev'));
