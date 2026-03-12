@@ -16,8 +16,22 @@ const AgentSetupPage = lazy(() => import('./pages/AgentSetupPage'));
 function PageShell() {
     return (
         <div style={{ minHeight: '100vh', paddingTop: 52, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, letterSpacing: '0.08em', color: '#9ca3af', textTransform: 'uppercase' }}>
-                Loading...
+            <div className="pulse-loader-container">
+                <div className="pulse-spinner">
+                    <div className="pulse-spinner-rect rect-1" />
+                    <div className="pulse-spinner-rect rect-2" />
+                    <div className="pulse-spinner-rect rect-3" />
+                    <div className="pulse-spinner-rect rect-4">
+                        <div /><div /><div /><div />
+                    </div>
+                </div>
+                <div className="loader-text-group">
+                    <div className="loader-main-text">Pulse</div>
+                    <div className="loader-sub-text">Aligning your mission...</div>
+                    <div className="loader-host-warning">
+                        Free hosted instance • May take 30-40s to wake up
+                    </div>
+                </div>
             </div>
         </div>
     );
