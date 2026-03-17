@@ -2,14 +2,8 @@
 
 Pulse is an AI operating layer for founders that turns conversations, context, and commitments into searchable memory, action, and accountability.
 
-## Demo
-
-Add your demo GIF here:
-
-```md
-![Pulse demo](./docs/demo.gif)
-```
-
+## Achitecture
+[Drawing](https://excalidraw.com/#json=4qptmwlGHlqjiokX_pxuy,vU4rgbPgEYV4PmYWJbBm5w)
 ## Features
 
 - RAG-native founder memory across self-report, LinkedIn, GitHub, Notion, and chat context
