@@ -7,19 +7,38 @@ import {
 } from './qdrantClient.js';
 
 export async function upsertChunks(userId, chunks) {
-  const points = chunks.map((chunk) => ({
-    id: uuidv4(),
-    vector: chunk.embedding,
-    payload: {
-      text: chunk.text,
-      userId,
-      chunkIndex: chunk.index,
-      source: chunk.source,
-      type: 'chunk',
-    },
-  }));
+  const normalizedPoints = chunks.map((chunk) => {
+    const chunkIndex = Number.isInteger(chunk.index)
+      ? chunk.index
+      : Number.isInteger(chunk.chunkIndex)
+        ? chunk.chunkIndex
+        : 0;
+    const totalChunks = Number.isInteger(chunk.totalChunks) ? chunk.totalChunks : chunks.length;
 
-  await qdrantClient.upsert(QDRANT_COLLECTION, { wait: true, points });
+    return {
+      id: uuidv4(),
+      vector: chunk.embedding,
+      payload: {
+      charEnd: chunk.charEnd,
+      charStart: chunk.charStart,
+      chunkIndex,
+      metadata: {
+        charEnd: chunk.charEnd,
+        charStart: chunk.charStart,
+        index: chunkIndex,
+        source: chunk.source,
+        totalChunks,
+      },
+      text: chunk.text,
+      totalChunks,
+      source: chunk.source,
+      userId,
+      type: 'chunk',
+      },
+    };
+  });
+
+  await qdrantClient.upsert(QDRANT_COLLECTION, { wait: true, points: normalizedPoints });
 }
 
 export async function upsertChatMemory(userId, text, embedding) {
@@ -86,6 +105,27 @@ export async function searchSimilar(userId, queryEmbedding, topK = 5) {
     with_payload: true,
   });
 
+  return rankSearchResults(results).slice(0, topK);
+}
+
+export async function searchWithFilter(userId, queryEmbedding, source, limit = 10) {
+  const results = await qdrantClient.search(QDRANT_COLLECTION, {
+    vector: queryEmbedding,
+    limit: Math.max(limit * 3, 8),
+    filter: {
+      must: [
+        { key: 'userId', match: { value: userId } },
+        { key: 'type', match: { value: 'chunk' } },
+        { key: 'source', match: { value: source } },
+      ],
+    },
+    with_payload: true,
+  });
+
+  return rankSearchResults(results).slice(0, limit);
+}
+
+function rankSearchResults(results) {
   return results
     .map((item) => {
       const memoryType = item.payload.memoryType;
@@ -102,8 +142,7 @@ export async function searchSimilar(userId, queryEmbedding, topK = 5) {
         source,
       };
     })
-    .sort((left, right) => right.score - left.score)
-    .slice(0, topK);
+    .sort((left, right) => right.score - left.score);
 }
 
 export async function deleteUserData(userId) {

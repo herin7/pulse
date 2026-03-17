@@ -2,6 +2,7 @@ export { ensureCollection } from './qdrantCollection.js';
 export {
   deleteUserData,
   searchSimilar,
+  searchWithFilter,
   upsertChatMemory,
   upsertChunks,
   upsertDurableMemory,

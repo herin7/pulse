@@ -1,16 +1,17 @@
 import { logger } from './logger.js';
 
 const EMBEDDING_ENDPOINT = 'https://integrate.api.nvidia.com/v1/embeddings';
-const EMBEDDING_MODEL = 'nvidia/llama-3.2-nemoretriever-300m-embed-v1';
+const EMBEDDING_MODEL = 'nvidia/nv-embedqa-e5-v5';
 const MAX_RETRIES = 3;
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 32;
+const RETRY_DELAYS_MS = [1000, 2000, 4000];
 
 function wait(durationMs) {
   return new Promise((resolve) => setTimeout(resolve, durationMs));
 }
 
 function buildRetryDelay(retryCount) {
-  return Math.pow(2, retryCount) * 2000 + Math.random() * 1000;
+  return RETRY_DELAYS_MS[retryCount] || RETRY_DELAYS_MS[RETRY_DELAYS_MS.length - 1];
 }
 
 async function requestEmbeddings(input, inputType, retryCount = 0) {

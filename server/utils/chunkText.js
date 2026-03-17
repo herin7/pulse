@@ -1,58 +1,100 @@
-export function chunkText(text, chunkSize = 1600, overlap = 160) {
-  let cleaned = text.replace(/<[^>]*>/g, '');
-  cleaned = cleaned.replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+const CHUNK_MAX_CHARS = 1200;
+const CHUNK_MIN_CHARS = 800;
+const CHUNK_OVERLAP_CHARS = 100;
+const SENTENCE_BOUNDARY_REGEX = /(?<=[.!?])\s+(?=[A-Z])/;
 
-  const sentences = cleaned.match(/[^.!?]*[.!?]+\s*/g) || [cleaned];
-  const trimmed = sentences.map((sentence) => sentence.trim()).filter((sentence) => sentence.length > 0);
+function normalizeText(text) {
+  return String(text || '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
 
-  const chunks = [];
-  let index = 0;
+function buildSentenceSpans(text) {
+  const sentences = text.split(SENTENCE_BOUNDARY_REGEX).map((sentence) => sentence.trim()).filter(Boolean);
+  const spans = [];
+  let cursor = 0;
 
-  while (index < trimmed.length) {
-    let chunk = '';
-    const start = index;
+  sentences.forEach((sentence) => {
+    const start = text.indexOf(sentence, cursor);
+    const end = start + sentence.length;
+    cursor = end;
+    spans.push({ sentence, start, end });
+  });
 
-    while (index < trimmed.length) {
-      const next = chunk ? `${chunk} ${trimmed[index]}` : trimmed[index];
-      if (chunk && next.length > chunkSize) break;
-      chunk = next;
-      index += 1;
-    }
+  return spans;
+}
 
-    if (index === start) {
-      chunk = trimmed[index];
-      index += 1;
-    }
+function buildChunkMetadata(source, index, totalChunks, start, end, text) {
+  return {
+    index,
+    totalChunks,
+    source,
+    charStart: start,
+    charEnd: end,
+    text,
+  };
+}
 
-    chunks.push({
-      text: chunk,
-      index: chunks.length,
-      charCount: chunk.length,
-    });
+export function chunkText(text, options = {}) {
+  const source = options.source || 'unknown';
+  const normalized = normalizeText(text);
+  if (!normalized) return [];
 
-    if (index < trimmed.length) {
-      let tail = '';
-      let rewind = index - 1;
+  const spans = buildSentenceSpans(normalized);
+  if (!spans.length) return [];
 
-      while (rewind >= start) {
-        const candidate = tail ? `${trimmed[rewind]} ${tail}` : trimmed[rewind];
-        if (candidate.length >= overlap) {
-          tail = candidate;
-          break;
-        }
-        tail = candidate;
-        rewind -= 1;
+  const rawChunks = [];
+  let sentenceIndex = 0;
+
+  while (sentenceIndex < spans.length) {
+    const startSentenceIndex = sentenceIndex;
+    let endSentenceIndex = sentenceIndex;
+    let charStart = spans[startSentenceIndex].start;
+    let charEnd = spans[endSentenceIndex].end;
+
+    while (endSentenceIndex + 1 < spans.length) {
+      const candidateEnd = spans[endSentenceIndex + 1].end;
+      const candidateLength = candidateEnd - charStart;
+      const currentLength = charEnd - charStart;
+
+      if (candidateLength > CHUNK_MAX_CHARS && currentLength >= CHUNK_MIN_CHARS) {
+        break;
       }
 
-      if (rewind > start) {
-        index = rewind;
+      endSentenceIndex += 1;
+      charEnd = candidateEnd;
+    }
+
+    rawChunks.push({ charStart, charEnd });
+    sentenceIndex = endSentenceIndex + 1;
+
+    if (sentenceIndex < spans.length) {
+      let overlapStart = endSentenceIndex;
+      while (overlapStart > startSentenceIndex) {
+        const overlapLength = spans[endSentenceIndex].end - spans[overlapStart].start;
+        if (overlapLength >= CHUNK_OVERLAP_CHARS) break;
+        overlapStart -= 1;
+      }
+
+      if (overlapStart > startSentenceIndex) {
+        sentenceIndex = overlapStart;
       }
     }
   }
 
-  if (chunks.length > 1 && chunks[chunks.length - 1].charCount <= 50) {
-    chunks.pop();
-  }
+  const chunks = rawChunks.map((chunk) => {
+    const textSlice = normalized.slice(chunk.charStart, chunk.charEnd).trim();
+    return {
+      charEnd: chunk.charEnd,
+      charStart: chunk.charStart,
+      text: textSlice,
+    };
+  });
 
-  return chunks;
+  const filteredChunks = chunks.filter((chunk) => chunk.text.length > 40);
+  return filteredChunks.map((chunk, index) => (
+    buildChunkMetadata(source, index, filteredChunks.length, chunk.charStart, chunk.charEnd, chunk.text)
+  ));
 }

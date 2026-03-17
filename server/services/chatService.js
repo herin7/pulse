@@ -4,7 +4,13 @@ import { buildEmailDraft, looksLikeEmailRequest } from '../agents/emailAgent.js'
 import { parseReminderMessage } from '../agents/reminderParser.js';
 import { getRecentIntel } from '../db/competitors.js';
 import { getOpenLoops } from '../db/openLoops.js';
-import { getCharacterCard, searchSimilar, upsertChatMemory, upsertDurableMemory } from '../db/qdrant.js';
+import {
+  getCharacterCard,
+  searchSimilar,
+  searchWithFilter,
+  upsertChatMemory,
+  upsertDurableMemory,
+} from '../db/qdrant.js';
 import { insertReminder } from '../db/reminders.js';
 import { getAgentProfileForUser } from '../services/agentProfileService.js';
 import { AppError } from '../utils/AppError.js';
@@ -14,15 +20,35 @@ import { callLLM } from '../utils/llmCall.js';
 import { clipText, estimateTokens, shouldPersistChatMemory } from '../utils/messageUtils.js';
 import { generateNvidiaEmbedding } from '../utils/nvidiaEmbedding.js';
 import { buildFallbackReply, buildSystemPrompt } from '../utils/promptBuilder.js';
+import { rerankChunks } from '../utils/reranker.js';
 import { getLogContext, logger } from '../utils/logger.js';
 
 const MAX_HISTORY_MESSAGES = 6;
 const MAX_HISTORY_MESSAGE_CHARS = 500;
+const MAX_RETRIEVED_CHUNKS = 10;
+const MAX_CONTEXT_CHUNKS = 3;
+
+function detectSourceHint(message) {
+  if (!message) return null;
+  if (/github|repo|code/i.test(message)) return 'github';
+  if (/linkedin/i.test(message)) return 'linkedin';
+  return null;
+}
+
+async function retrieveRelevantChunks(userId, queryEmbedding, message) {
+  const sourceHint = detectSourceHint(message);
+  const chunks = sourceHint
+    ? await searchWithFilter(userId, queryEmbedding, sourceHint, MAX_RETRIEVED_CHUNKS)
+    : await searchSimilar(userId, queryEmbedding, MAX_RETRIEVED_CHUNKS);
+
+  const reranked = await rerankChunks(message, chunks, MAX_CONTEXT_CHUNKS);
+  return reranked.length ? reranked : chunks.slice(0, MAX_CONTEXT_CHUNKS);
+}
 
 export async function buildChatResult({ files, history, message, req }) {
   const queryEmbedding = await generateNvidiaEmbedding(message || 'Analyzing documents');
   const [relevantChunks, characterCard, agentProfile] = await Promise.all([
-    searchSimilar(req.user.id, queryEmbedding, 3),
+    retrieveRelevantChunks(req.user.id, queryEmbedding, message),
     getCharacterCard(req.user.id),
     getAgentProfileForUser(req.user._id),
   ]);

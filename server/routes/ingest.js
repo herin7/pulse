@@ -63,7 +63,7 @@ router.post('/api/ingest', requireAuth, asyncHandler(async (req, res) => {
     { text: llmDump || '', source: 'ai_self_report' },
     { text: linkedinPaste || '', source: 'linkedin' },
     { text: githubText, source: 'github' },
-  ].flatMap(({ source, text }) => text ? chunkText(text).map((chunk) => ({ ...chunk, source })) : []);
+  ].flatMap(({ source, text }) => text ? chunkText(text, { source }) : []);
 
   if (!chunks.length) {
     throw new AppError('At least one source is required for ingest', 400, 'EMPTY_INGEST');

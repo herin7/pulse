@@ -19,7 +19,11 @@ function buildSynthesisContext(chunks) {
   }, {});
 
   return Object.values(grouped)
-    .flatMap((items) => items.sort((left, right) => left.chunkIndex - right.chunkIndex).slice(0, 5))
+    .flatMap((items) => items.sort((left, right) => {
+      const leftIndex = Number.isInteger(left.index) ? left.index : left.chunkIndex || 0;
+      const rightIndex = Number.isInteger(right.index) ? right.index : right.chunkIndex || 0;
+      return leftIndex - rightIndex;
+    }).slice(0, 5))
     .map((chunk) => `[${chunk.source}]: ${chunk.text}`)
     .join('\n\n');
 }

@@ -506,6 +506,17 @@ function MessageRow({ message, profile }) {
         </div>
         <div className={isUser ? 'chat-bubble-user' : 'chat-bubble-ai'}>
           {renderMessageContent(message.content)}
+          {message.files && message.files.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-2 pt-2 border-t border-white/20">
+              {message.files.map((file, i) => (
+                <div key={i} className="flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded text-[10px] font-medium">
+                  <span>📎</span>
+                  <span className="truncate max-w-[120px]">{file.name}</span>
+                  <span className="opacity-60 lowercase">({file.type?.split('/')[1] || 'file'})</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         {sources.length > 0 && (
           <div className="chat-source-row">
@@ -696,6 +707,7 @@ export default function Chat({ characterCard }) {
   const [competitorStatus, setCompetitorStatus] = useState(null);
   const [lastRefreshed, setLastRefreshed] = useState(null);
   const [showPanel, setShowPanel] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [toast, setToast] = useState(null);
   const [overdueLoops, setOverdueLoops] = useState([]);
   const [showLoopBanner, setShowLoopBanner] = useState(false);
@@ -1305,28 +1317,48 @@ export default function Chat({ characterCard }) {
 
   const handleSend = useCallback(async () => {
     const text = input.trim();
-    if (!text || isLoading) return;
+    if (!text && selectedFiles.length === 0) return;
+    if (isLoading) return;
 
     const token = localStorage.getItem('pulse_token');
     const inputMode = inputModeRef.current;
     inputModeRef.current = 'text';
-    const userMsg = { role: 'user', content: text };
+
+    // Optimistically add user message
+    const userMsg = { 
+      role: 'user', 
+      content: text || (selectedFiles.length > 0 ? `Sent ${selectedFiles.length} file(s)` : ''),
+      files: selectedFiles.map(f => ({ name: f.name, type: f.type }))
+    };
+    
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
+    const filesToUpload = [...selectedFiles];
+    setSelectedFiles([]);
     setIsLoading(true);
 
     try {
-      const queryEmbedding = await embed(text);
+      const formData = new FormData();
+      formData.append('message', text);
+      
+      // We will let the server handle embedding now since it is multimodal
+      // queryEmbedding is no longer sent from client if server can do it with Gemini.
+      
+      filesToUpload.forEach((file) => {
+        formData.append('files', file);
+      });
 
       const history = messages.slice(-10);
+      formData.append('history', JSON.stringify(history));
+
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
+          // Content-Type is set automatically by fetch when using FormData
         },
         credentials: 'include',
-        body: JSON.stringify({ message: text, queryEmbedding, history }),
+        body: formData,
       });
 
       if (!res.ok) throw new Error('Chat request failed');
@@ -1548,7 +1580,36 @@ export default function Chat({ characterCard }) {
                 </button>
               </div>
               <div className="flex items-center justify-between mt-2 px-2">
-                <div className="text-neutral-400 text-sm cursor-default">📎</div>
+                <div className="flex items-center gap-3">
+                  <label className="text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer text-sm" title="Upload files (Image, Video, Audio, PDF)">
+                    📎
+                    <input
+                      type="file"
+                      multiple
+                      className="hidden"
+                      accept="image/*,video/*,audio/*,application/pdf"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        setSelectedFiles((prev) => [...prev, ...files]);
+                      }}
+                    />
+                  </label>
+                  {selectedFiles.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedFiles.map((file, i) => (
+                        <span key={i} className="bg-slate-100 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 group">
+                          {file.name}
+                          <button 
+                            onClick={() => setSelectedFiles(prev => prev.filter((_, idx) => idx !== i))}
+                            className="text-neutral-400 hover:text-red-500"
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <div className="flex items-center gap-2">
                   <div className="pulse-model-pill">
                     <span>✦</span>
