@@ -1,6 +1,10 @@
 node_modules/
 dist/
 .env
+.env.*
+!.env.example
+!server/.env.example
 *.log
 client/node_modules
 server/node_modules
+coverage/

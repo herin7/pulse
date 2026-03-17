@@ -1,0 +1,1393 @@
+Temporary Notion fetch inspection log.
+============================================================
+Timestamp: 2026-03-17T08:52:14.818Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-80e6-a3cc-ca21f6573ed8
+Title: Check the box to mark items as done
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:52:14.818Z
+Mode: workspace-search
+Query: workspace
+Page ID: 5282d383-c930-834c-9f2f-81bc03353b01
+Title: Bday Cash
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:52:14.818Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-800c-b5fb-d16c2a6d682d
+Title: Tasks today
+Content:
+Capital allocation strategy
+Decide asset mix: equities, debt, alternatives
+Maintain long-term, low-leverage philosophy
+Avoid overexposure to hype sectors
+Broking business oversight (Zerodha core)
+Keep costs lowest in industry
+Ensure platform stability (high uptime, low latency)
+Monitor regulatory compliance (SEBI)
+Product direction
+Improve Kite by Zerodha (UX, speed, analytics)
+Expand Coin by Zerodha adoption
+Evaluate new fintech tools (but avoid clutter)
+Risk management
+Strict no-debt philosophy for company
+Strong treasury management
+Safeguard against market crashes affecting revenue
+Team and culture
+Keep organization flat and efficient
+Avoid over-hiring
+Focus on high ownership individuals
+Regulatory strategy
+Stay ahead of Securities and Exchange Board of India rules
+Adapt quickly to margin, F&O, and compliance changes
+Customer trust & education
+Expand Varsity by Zerodha content
+Zerodha
+Article
+Talk
+Article
+Talk
+Read
+
+============================================================
+Timestamp: 2026-03-17T08:52:14.818Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-804e-b634-e294b05a83a5
+Title: To Do List
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:52:14.818Z
+Mode: workspace-search
+Query: workspace
+Page ID: 74d2d383-c930-83db-9a57-8157d686e2e9
+Title: Side Gig
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:52:16.533Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-804e-b634-e294b05a83a5
+Title: To Do List
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:52:16.533Z
+Mode: workspace-search
+Query: workspace
+Page ID: 5282d383-c930-834c-9f2f-81bc03353b01
+Title: Bday Cash
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:52:16.533Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-80e6-a3cc-ca21f6573ed8
+Title: Check the box to mark items as done
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:52:16.533Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-800c-b5fb-d16c2a6d682d
+Title: Tasks today
+Content:
+Capital allocation strategy
+Decide asset mix: equities, debt, alternatives
+Maintain long-term, low-leverage philosophy
+Avoid overexposure to hype sectors
+Broking business oversight (Zerodha core)
+Keep costs lowest in industry
+Ensure platform stability (high uptime, low latency)
+Monitor regulatory compliance (SEBI)
+Product direction
+Improve Kite by Zerodha (UX, speed, analytics)
+Expand Coin by Zerodha adoption
+Evaluate new fintech tools (but avoid clutter)
+Risk management
+Strict no-debt philosophy for company
+Strong treasury management
+Safeguard against market crashes affecting revenue
+Team and culture
+Keep organization flat and efficient
+Avoid over-hiring
+Focus on high ownership individuals
+Regulatory strategy
+Stay ahead of Securities and Exchange Board of India rules
+Adapt quickly to margin, F&O, and compliance changes
+Customer trust & education
+Expand Varsity by Zerodha content
+Zerodha
+Article
+Talk
+Article
+Talk
+Read
+
+============================================================
+Timestamp: 2026-03-17T08:52:16.533Z
+Mode: workspace-search
+Query: workspace
+Page ID: 74d2d383-c930-83db-9a57-8157d686e2e9
+Title: Side Gig
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:52:19.156Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-80e6-a3cc-ca21f6573ed8
+Title: Check the box to mark items as done
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:52:19.156Z
+Mode: workspace-search
+Query: workspace
+Page ID: 5282d383-c930-834c-9f2f-81bc03353b01
+Title: Bday Cash
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:52:19.156Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-800c-b5fb-d16c2a6d682d
+Title: Tasks today
+Content:
+Capital allocation strategy
+Decide asset mix: equities, debt, alternatives
+Maintain long-term, low-leverage philosophy
+Avoid overexposure to hype sectors
+Broking business oversight (Zerodha core)
+Keep costs lowest in industry
+Ensure platform stability (high uptime, low latency)
+Monitor regulatory compliance (SEBI)
+Product direction
+Improve Kite by Zerodha (UX, speed, analytics)
+Expand Coin by Zerodha adoption
+Evaluate new fintech tools (but avoid clutter)
+Risk management
+Strict no-debt philosophy for company
+Strong treasury management
+Safeguard against market crashes affecting revenue
+Team and culture
+Keep organization flat and efficient
+Avoid over-hiring
+Focus on high ownership individuals
+Regulatory strategy
+Stay ahead of Securities and Exchange Board of India rules
+Adapt quickly to margin, F&O, and compliance changes
+Customer trust & education
+Expand Varsity by Zerodha content
+Zerodha
+Article
+Talk
+Article
+Talk
+Read
+
+============================================================
+Timestamp: 2026-03-17T08:52:19.156Z
+Mode: workspace-search
+Query: workspace
+Page ID: 74d2d383-c930-83db-9a57-8157d686e2e9
+Title: Side Gig
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:52:19.156Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-804e-b634-e294b05a83a5
+Title: To Do List
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:53:00.368Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-804e-b634-e294b05a83a5
+Title: To Do List
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:53:00.368Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-80e6-a3cc-ca21f6573ed8
+Title: Check the box to mark items as done
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:53:00.368Z
+Mode: workspace-search
+Query: workspace
+Page ID: 5282d383-c930-834c-9f2f-81bc03353b01
+Title: Bday Cash
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:53:00.368Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-800c-b5fb-d16c2a6d682d
+Title: Tasks today
+Content:
+Capital allocation strategy
+Decide asset mix: equities, debt, alternatives
+Maintain long-term, low-leverage philosophy
+Avoid overexposure to hype sectors
+Broking business oversight (Zerodha core)
+Keep costs lowest in industry
+Ensure platform stability (high uptime, low latency)
+Monitor regulatory compliance (SEBI)
+Product direction
+Improve Kite by Zerodha (UX, speed, analytics)
+Expand Coin by Zerodha adoption
+Evaluate new fintech tools (but avoid clutter)
+Risk management
+Strict no-debt philosophy for company
+Strong treasury management
+Safeguard against market crashes affecting revenue
+Team and culture
+Keep organization flat and efficient
+Avoid over-hiring
+Focus on high ownership individuals
+Regulatory strategy
+Stay ahead of Securities and Exchange Board of India rules
+Adapt quickly to margin, F&O, and compliance changes
+Customer trust & education
+Expand Varsity by Zerodha content
+Zerodha
+Article
+Talk
+Article
+Talk
+Read
+
+============================================================
+Timestamp: 2026-03-17T08:53:00.368Z
+Mode: workspace-search
+Query: workspace
+Page ID: 74d2d383-c930-83db-9a57-8157d686e2e9
+Title: Side Gig
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:58:18.942Z
+Mode: workspace-search
+Query: workspace
+Page ID: 5282d383-c930-834c-9f2f-81bc03353b01
+Title: Bday Cash
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:58:18.942Z
+Mode: workspace-search
+Query: workspace
+Page ID: 74d2d383-c930-83db-9a57-8157d686e2e9
+Title: Side Gig
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:58:18.942Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-804e-b634-e294b05a83a5
+Title: To Do List
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:58:18.942Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-800c-b5fb-d16c2a6d682d
+Title: Tasks today
+Content:
+Capital allocation strategy
+Decide asset mix: equities, debt, alternatives
+Maintain long-term, low-leverage philosophy
+Avoid overexposure to hype sectors
+Broking business oversight (Zerodha core)
+Keep costs lowest in industry
+Ensure platform stability (high uptime, low latency)
+Monitor regulatory compliance (SEBI)
+Product direction
+Improve Kite by Zerodha (UX, speed, analytics)
+Expand Coin by Zerodha adoption
+Evaluate new fintech tools (but avoid clutter)
+Risk management
+Strict no-debt philosophy for company
+Strong treasury management
+Safeguard against market crashes affecting revenue
+Team and culture
+Keep organization flat and efficient
+Avoid over-hiring
+Focus on high ownership individuals
+Regulatory strategy
+Stay ahead of Securities and Exchange Board of India rules
+Adapt quickly to margin, F&O, and compliance changes
+Customer trust & education
+Expand Varsity by Zerodha content
+Zerodha
+Article
+Talk
+Article
+Talk
+Read
+
+============================================================
+Timestamp: 2026-03-17T08:58:18.938Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-80e6-a3cc-ca21f6573ed8
+Title: Check the box to mark items as done
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:58:58.404Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-80e6-a3cc-ca21f6573ed8
+Title: Check the box to mark items as done
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:58:58.404Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-800c-b5fb-d16c2a6d682d
+Title: Tasks today
+Content:
+Capital allocation strategy
+Decide asset mix: equities, debt, alternatives
+Maintain long-term, low-leverage philosophy
+Avoid overexposure to hype sectors
+Broking business oversight (Zerodha core)
+Keep costs lowest in industry
+Ensure platform stability (high uptime, low latency)
+Monitor regulatory compliance (SEBI)
+Product direction
+Improve Kite by Zerodha (UX, speed, analytics)
+Expand Coin by Zerodha adoption
+Evaluate new fintech tools (but avoid clutter)
+Risk management
+Strict no-debt philosophy for company
+Strong treasury management
+Safeguard against market crashes affecting revenue
+Team and culture
+Keep organization flat and efficient
+Avoid over-hiring
+Focus on high ownership individuals
+Regulatory strategy
+Stay ahead of Securities and Exchange Board of India rules
+Adapt quickly to margin, F&O, and compliance changes
+Customer trust & education
+Expand Varsity by Zerodha content
+Zerodha
+Article
+Talk
+Article
+Talk
+Read
+
+============================================================
+Timestamp: 2026-03-17T08:58:58.404Z
+Mode: workspace-search
+Query: workspace
+Page ID: 3262d383-c930-804e-b634-e294b05a83a5
+Title: To Do List
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:58:58.404Z
+Mode: workspace-search
+Query: workspace
+Page ID: 74d2d383-c930-83db-9a57-8157d686e2e9
+Title: Side Gig
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T08:58:58.404Z
+Mode: workspace-search
+Query: workspace
+Page ID: 5282d383-c930-834c-9f2f-81bc03353b01
+Title: Bday Cash
+Content:
+(empty)
+
+============================================================
+Timestamp: 2026-03-17T09:27:30.496Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-see-your-content-your-way-3262d383c930806ebe09f518cfd5c217
+Page ID: 3262d383-c930-806e-be09-f518cfd5c217
+Title: Click me to learn how to see your content your way
+Content:
+Due date: 2026-03-18 | Click me to learn how to see your content your way
+Your content can be shown in countless ways within Notion. Try adding a new view to the To Do List database to render your content how you want.
+Hover over the “Todo” and “Done” view tabs and click the  to select a new view
+Select Board (or whatever view you’d prefer to select!). This adds a new view and can always be undone.
+Now see your tasks in a board view! Try drag and dropping tasks into done to mark them as completed.
+
+============================================================
+Timestamp: 2026-03-17T09:27:30.666Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T09:27:30.675Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Getting-Started-3262d383c9308025a74cc7eb370b8cf5
+Page ID: 3262d383-c930-8025-a74c-c7eb370b8cf5
+Title: Getting Started
+Content:
+Getting Started
+Create an account with Notion
+Click anywhere below and type / to see what you can create – headers, tables, to-do’s, etc.
+Find, organize, and add new pages using the sidebar to the left 👈
+Check out the Todo List on the left 👈 we added for you with some more tips and tricks to best use Notion
+This is a toggle block. Click the little triangle to see a few more useful tips!
+
+============================================================
+Timestamp: 2026-03-17T09:27:31.129Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T09:27:38.481Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-see-your-content-your-way-3262d383c930806ebe09f518cfd5c217
+Page ID: 3262d383-c930-806e-be09-f518cfd5c217
+Title: Click me to learn how to see your content your way
+Content:
+Due date: 2026-03-18 | Click me to learn how to see your content your way
+Your content can be shown in countless ways within Notion. Try adding a new view to the To Do List database to render your content how you want.
+Hover over the “Todo” and “Done” view tabs and click the  to select a new view
+Select Board (or whatever view you’d prefer to select!). This adds a new view and can always be undone.
+Now see your tasks in a board view! Try drag and dropping tasks into done to mark them as completed.
+
+============================================================
+Timestamp: 2026-03-17T09:27:38.583Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Getting-Started-3262d383c9308025a74cc7eb370b8cf5
+Page ID: 3262d383-c930-8025-a74c-c7eb370b8cf5
+Title: Getting Started
+Content:
+Getting Started
+Create an account with Notion
+Click anywhere below and type / to see what you can create – headers, tables, to-do’s, etc.
+Find, organize, and add new pages using the sidebar to the left 👈
+Check out the Todo List on the left 👈 we added for you with some more tips and tricks to best use Notion
+This is a toggle block. Click the little triangle to see a few more useful tips!
+
+============================================================
+Timestamp: 2026-03-17T09:27:38.583Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T09:27:39.033Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T09:28:22.118Z
+Mode: sdk-page-read
+Query: https://www.notion.so/To-Do-List-3262d383c930804eb634e294b05a83a5
+Page ID: 3262d383-c930-804e-b634-e294b05a83a5
+Title: To Do List
+Content:
+To Do List
+
+============================================================
+Timestamp: 2026-03-17T09:28:22.170Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Weekly-To-do-List-f002d383c93083b6bccd01cdca6be362
+Page ID: f002d383-c930-83b6-bccd-01cdca6be362
+Title: Weekly To-do List
+Content:
+Weekly To-do List
+Add your weekly to-do’s. You can always add more by typing /to-do in an empty space. Click this button to create a fresh set of to-do’s for a new week. You can drag any old to-do’s from last week to the new week. ↓
+March 4 - March 9
+
+============================================================
+Timestamp: 2026-03-17T09:31:36.259Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Check-the-box-to-mark-items-as-done-3262d383c93080e6a3ccca21f6573ed8
+Page ID: 3262d383-c930-80e6-a3cc-ca21f6573ed8
+Title: Check the box to mark items as done
+Content:
+Due date: 2026-03-17 | Check the box to mark items as done
+
+============================================================
+Timestamp: 2026-03-17T09:31:36.264Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Agent-Pulse-3262d383c930804ca382c0069b659158
+Page ID: 3262d383-c930-804c-a382-c0069b659158
+Title: Agent Pulse
+Content:
+Agent Pulse
+
+============================================================
+Timestamp: 2026-03-17T09:40:24.299Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T09:40:24.383Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Getting-Started-3262d383c9308025a74cc7eb370b8cf5
+Page ID: 3262d383-c930-8025-a74c-c7eb370b8cf5
+Title: Getting Started
+Content:
+Getting Started
+Create an account with Notion
+Click anywhere below and type / to see what you can create – headers, tables, to-do’s, etc.
+Find, organize, and add new pages using the sidebar to the left 👈
+Check out the Todo List on the left 👈 we added for you with some more tips and tricks to best use Notion
+This is a toggle block. Click the little triangle to see a few more useful tips!
+
+============================================================
+Timestamp: 2026-03-17T09:40:24.463Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T09:42:44.201Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Agent-Pulse-3262d383c930804ca382c0069b659158
+Page ID: 3262d383-c930-804c-a382-c0069b659158
+Title: Agent Pulse
+Content:
+Agent Pulse
+
+============================================================
+Timestamp: 2026-03-17T09:42:44.495Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-the-blue-New-button-to-add-a-task-3262d383c93080269feade3a19702951
+Page ID: 3262d383-c930-8026-9fea-de3a19702951
+Title: Click the blue New button to add a task
+Content:
+Due date: 2026-03-17 | Click the blue New button to add a task
+
+============================================================
+Timestamp: 2026-03-17T09:43:23.869Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-the-blue-New-button-to-add-a-task-3262d383c93080269feade3a19702951
+Page ID: 3262d383-c930-8026-9fea-de3a19702951
+Title: Click the blue New button to add a task
+Content:
+Due date: 2026-03-17 | Click the blue New button to add a task
+
+============================================================
+Timestamp: 2026-03-17T09:43:24.373Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Agent-Pulse-3262d383c930804ca382c0069b659158
+Page ID: 3262d383-c930-804c-a382-c0069b659158
+Title: Agent Pulse
+Content:
+Agent Pulse
+
+============================================================
+Timestamp: 2026-03-17T09:43:37.743Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Agent-Pulse-3262d383c930804ca382c0069b659158
+Page ID: 3262d383-c930-804c-a382-c0069b659158
+Title: Agent Pulse
+Content:
+Agent Pulse
+
+============================================================
+Timestamp: 2026-03-17T09:43:38.008Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-the-blue-New-button-to-add-a-task-3262d383c93080269feade3a19702951
+Page ID: 3262d383-c930-8026-9fea-de3a19702951
+Title: Click the blue New button to add a task
+Content:
+Due date: 2026-03-17 | Click the blue New button to add a task
+
+============================================================
+Timestamp: 2026-03-17T09:56:32.401Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Agent-Pulse-3262d383c930804ca382c0069b659158
+Page ID: 3262d383-c930-804c-a382-c0069b659158
+Title: Agent Pulse
+Content:
+Agent Pulse
+
+============================================================
+Timestamp: 2026-03-17T09:56:33.071Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-the-blue-New-button-to-add-a-task-3262d383c93080269feade3a19702951
+Page ID: 3262d383-c930-8026-9fea-de3a19702951
+Title: Click the blue New button to add a task
+Content:
+Due date: 2026-03-17 | Click the blue New button to add a task
+
+============================================================
+Timestamp: 2026-03-17T09:57:18.503Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Agent-Pulse-3262d383c930804ca382c0069b659158
+Page ID: 3262d383-c930-804c-a382-c0069b659158
+Title: Agent Pulse
+Content:
+Agent Pulse
+
+============================================================
+Timestamp: 2026-03-17T09:57:18.565Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-the-blue-New-button-to-add-a-task-3262d383c93080269feade3a19702951
+Page ID: 3262d383-c930-8026-9fea-de3a19702951
+Title: Click the blue New button to add a task
+Content:
+Due date: 2026-03-17 | Click the blue New button to add a task
+
+============================================================
+Timestamp: 2026-03-17T09:58:59.479Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T09:58:59.500Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Getting-Started-3262d383c9308025a74cc7eb370b8cf5
+Page ID: 3262d383-c930-8025-a74c-c7eb370b8cf5
+Title: Getting Started
+Content:
+Getting Started
+Create an account with Notion
+Click anywhere below and type / to see what you can create – headers, tables, to-do’s, etc.
+Find, organize, and add new pages using the sidebar to the left 👈
+Check out the Todo List on the left 👈 we added for you with some more tips and tricks to best use Notion
+This is a toggle block. Click the little triangle to see a few more useful tips!
+
+============================================================
+Timestamp: 2026-03-17T09:59:00.196Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T09:59:02.449Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T09:59:03.065Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Getting-Started-3262d383c9308025a74cc7eb370b8cf5
+Page ID: 3262d383-c930-8025-a74c-c7eb370b8cf5
+Title: Getting Started
+Content:
+Getting Started
+Create an account with Notion
+Click anywhere below and type / to see what you can create – headers, tables, to-do’s, etc.
+Find, organize, and add new pages using the sidebar to the left 👈
+Check out the Todo List on the left 👈 we added for you with some more tips and tricks to best use Notion
+This is a toggle block. Click the little triangle to see a few more useful tips!
+
+============================================================
+Timestamp: 2026-03-17T09:59:03.237Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T09:59:47.882Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-the-blue-New-button-to-add-a-task-3262d383c93080269feade3a19702951
+Page ID: 3262d383-c930-8026-9fea-de3a19702951
+Title: Click the blue New button to add a task
+Content:
+Due date: 2026-03-17 | Click the blue New button to add a task
+
+============================================================
+Timestamp: 2026-03-17T09:59:47.896Z
+Mode: sdk-page-read
+Query: https://www.notion.so/See-finished-items-in-the-Done-view-3262d383c93080749f87d78ad0e5c8e3
+Page ID: 3262d383-c930-8074-9f87-d78ad0e5c8e3
+Title: See finished items in the “Done” view
+Content:
+Due date: 2026-03-17 | See finished items in the “Done” view
+A “view” is a way to look at your data. It can be simple as preset filters to a full calendar of events — all using the same underlying data. 
+Click Done view to see just your finished tasks.
+
+============================================================
+Timestamp: 2026-03-17T10:02:43.006Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T10:02:43.357Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T10:02:43.899Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Getting-Started-3262d383c9308025a74cc7eb370b8cf5
+Page ID: 3262d383-c930-8025-a74c-c7eb370b8cf5
+Title: Getting Started
+Content:
+Getting Started
+Create an account with Notion
+Click anywhere below and type / to see what you can create – headers, tables, to-do’s, etc.
+Find, organize, and add new pages using the sidebar to the left 👈
+Check out the Todo List on the left 👈 we added for you with some more tips and tricks to best use Notion
+This is a toggle block. Click the little triangle to see a few more useful tips!
+
+============================================================
+Timestamp: 2026-03-17T10:02:47.374Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T10:02:47.894Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Getting-Started-3262d383c9308025a74cc7eb370b8cf5
+Page ID: 3262d383-c930-8025-a74c-c7eb370b8cf5
+Title: Getting Started
+Content:
+Getting Started
+Create an account with Notion
+Click anywhere below and type / to see what you can create – headers, tables, to-do’s, etc.
+Find, organize, and add new pages using the sidebar to the left 👈
+Check out the Todo List on the left 👈 we added for you with some more tips and tricks to best use Notion
+This is a toggle block. Click the little triangle to see a few more useful tips!
+
+============================================================
+Timestamp: 2026-03-17T10:02:48.192Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T10:03:51.082Z
+Mode: sdk-page-read
+Query: https://www.notion.so/To-Do-List-3262d383c930804eb634e294b05a83a5
+Page ID: 3262d383-c930-804e-b634-e294b05a83a5
+Title: To Do List
+Content:
+To Do List
+
+============================================================
+Timestamp: 2026-03-17T10:03:51.110Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Weekly-To-do-List-f002d383c93083b6bccd01cdca6be362
+Page ID: f002d383-c930-83b6-bccd-01cdca6be362
+Title: Weekly To-do List
+Content:
+Weekly To-do List
+Add your weekly to-do’s. You can always add more by typing /to-do in an empty space. Click this button to create a fresh set of to-do’s for a new week. You can drag any old to-do’s from last week to the new week. ↓
+March 4 - March 9
+
+============================================================
+Timestamp: 2026-03-17T10:08:45.092Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Dinner-with-Rachel-f1b2d383c930822ca5f0016bea9428f7
+Page ID: f1b2d383-c930-822c-a5f0-016bea9428f7
+Title: Dinner with Rachel
+Content:
+Dinner with Rachel
+
+============================================================
+Timestamp: 2026-03-17T10:08:45.148Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Example-sub-page-3262d383c93080bc81a1e4386d0543df
+Page ID: 3262d383-c930-80bc-81a1-e4386d0543df
+Title: Example sub-page
+Content:
+Example sub-page
+
+============================================================
+Timestamp: 2026-03-17T10:13:56.851Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Add-3262d383c93081a2a9f7e2eb96741bfb
+Page ID: 3262d383-c930-81a2-a9f7-e2eb96741bfb
+Title: Add
+Content:
+Add
+Detected from Pulse chat on 17/3/2026
+
+============================================================
+Timestamp: 2026-03-17T10:13:56.984Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-the-blue-New-button-to-add-a-task-3262d383c93080269feade3a19702951
+Page ID: 3262d383-c930-8026-9fea-de3a19702951
+Title: Click the blue New button to add a task
+Content:
+Due date: 2026-03-17 | Click the blue New button to add a task
+
+============================================================
+Timestamp: 2026-03-17T10:15:05.325Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Add-3262d383c93081a2a9f7e2eb96741bfb
+Page ID: 3262d383-c930-81a2-a9f7-e2eb96741bfb
+Title: Add
+Content:
+Add
+Detected from Pulse chat on 17/3/2026
+
+============================================================
+Timestamp: 2026-03-17T10:15:05.495Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-the-blue-New-button-to-add-a-task-3262d383c93080269feade3a19702951
+Page ID: 3262d383-c930-8026-9fea-de3a19702951
+Title: Click the blue New button to add a task
+Content:
+Due date: 2026-03-17 | Click the blue New button to add a task
+
+============================================================
+Timestamp: 2026-03-17T10:16:33.529Z
+Mode: sdk-page-read
+Query: https://www.notion.so/See-finished-items-in-the-Done-view-3262d383c93080749f87d78ad0e5c8e3
+Page ID: 3262d383-c930-8074-9f87-d78ad0e5c8e3
+Title: See finished items in the “Done” view
+Content:
+Due date: 2026-03-17 | See finished items in the “Done” view
+A “view” is a way to look at your data. It can be simple as preset filters to a full calendar of events — all using the same underlying data. 
+Click Done view to see just your finished tasks.
+
+============================================================
+Timestamp: 2026-03-17T10:20:34.766Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T10:20:34.853Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T10:20:43.279Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T10:20:43.905Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T10:24:21.800Z
+Mode: sdk-page-read
+Query: https://www.notion.so/See-finished-items-in-the-Done-view-3262d383c93080749f87d78ad0e5c8e3
+Page ID: 3262d383-c930-8074-9f87-d78ad0e5c8e3
+Title: See finished items in the “Done” view
+Content:
+Due date: 2026-03-17 | See finished items in the “Done” view
+A “view” is a way to look at your data. It can be simple as preset filters to a full calendar of events — all using the same underlying data. 
+Click Done view to see just your finished tasks.
+
+============================================================
+Timestamp: 2026-03-17T10:24:21.904Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Scale-Paytm-internationally-3262d383c93081b1ae9ff6a99f096d5d
+Page ID: 3262d383-c930-81b1-ae9f-f6a99f096d5d
+Title: Scale Paytm internationally
+Content:
+Scale Paytm internationally
+Detected from Pulse chat on 17/3/2026
+
+============================================================
+Timestamp: 2026-03-17T10:24:59.151Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Scale-Paytm-internationally-3262d383c93081b1ae9ff6a99f096d5d
+Page ID: 3262d383-c930-81b1-ae9f-f6a99f096d5d
+Title: Scale Paytm internationally
+Content:
+Scale Paytm internationally
+Detected from Pulse chat on 17/3/2026
+
+============================================================
+Timestamp: 2026-03-17T10:24:59.418Z
+Mode: sdk-page-read
+Query: https://www.notion.so/See-finished-items-in-the-Done-view-3262d383c93080749f87d78ad0e5c8e3
+Page ID: 3262d383-c930-8074-9f87-d78ad0e5c8e3
+Title: See finished items in the “Done” view
+Content:
+Due date: 2026-03-17 | See finished items in the “Done” view
+A “view” is a way to look at your data. It can be simple as preset filters to a full calendar of events — all using the same underlying data. 
+Click Done view to see just your finished tasks.
+
+============================================================
+Timestamp: 2026-03-17T10:42:53.830Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T10:42:54.105Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T10:43:02.674Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T10:43:02.691Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T10:46:50.063Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Add-3262d383c93081a2a9f7e2eb96741bfb
+Page ID: 3262d383-c930-81a2-a9f7-e2eb96741bfb
+Title: Add
+Content:
+Add
+Detected from Pulse chat on 17/3/2026
+
+============================================================
+Timestamp: 2026-03-17T10:46:50.124Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Check-the-box-to-mark-items-as-done-3262d383c93080e6a3ccca21f6573ed8
+Page ID: 3262d383-c930-80e6-a3cc-ca21f6573ed8
+Title: Check the box to mark items as done
+Content:
+Due date: 2026-03-17 | Check the box to mark items as done
+
+============================================================
+Timestamp: 2026-03-17T10:48:42.399Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Check-the-box-to-mark-items-as-done-3262d383c93080e6a3ccca21f6573ed8
+Page ID: 3262d383-c930-80e6-a3cc-ca21f6573ed8
+Title: Check the box to mark items as done
+Content:
+Due date: 2026-03-17 | Check the box to mark items as done
+
+============================================================
+Timestamp: 2026-03-17T10:48:43.197Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-the-blue-New-button-to-add-a-task-3262d383c93080269feade3a19702951
+Page ID: 3262d383-c930-8026-9fea-de3a19702951
+Title: Click the blue New button to add a task
+Content:
+Due date: 2026-03-17 | Click the blue New button to add a task
+
+============================================================
+Timestamp: 2026-03-17T10:50:37.319Z
+Mode: sdk-page-read
+Query: https://www.notion.so/See-finished-items-in-the-Done-view-3262d383c93080749f87d78ad0e5c8e3
+Page ID: 3262d383-c930-8074-9f87-d78ad0e5c8e3
+Title: See finished items in the “Done” view
+Content:
+Due date: 2026-03-17 | See finished items in the “Done” view
+A “view” is a way to look at your data. It can be simple as preset filters to a full calendar of events — all using the same underlying data. 
+Click Done view to see just your finished tasks.
+
+============================================================
+Timestamp: 2026-03-17T10:50:37.884Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Integration-gallery-3262d383c93080a8b0e8fcba0a3a689d
+Page ID: 3262d383-c930-80a8-b0e8-fcba0a3a689d
+Title: Integration gallery
+Content:
+Integration gallery
+Documentation Index
+Introduction
+Learn the conventions, authentication, and pagination patterns used across the Notion API.
+Integrations use the API to access Notion's pages, databases, and users. Integrations can connect services to Notion and build interactive experiences for users within Notion. Using the navigation on the left, you'll find details for objects and endpoints used in the API.
+<Note>
+You need an integration token to interact with the Notion API. You can find an integration token after you create an integration on the integration settings page. If this is your first look at the Notion API, we recommend beginning with the Getting started guide to learn how to create an integration.
+If you want to work on a specific integration, but can't access the token, confirm that you are an admin in the associated workspace. You can check inside the Notion UI via Settings & Members in the left sidebar. If you're not an admin in any of your workspaces, you can create a personal workspace for free.
+</Note>
+Conventions
+The base URL to send all API requests is https://api.notion.com. HTTPS is required for all API requests.
+The Notion API follows RESTful conventions when possible, with most operations performed via GET, POST, PATCH, and DELETE requests on page and database resources. Request and response bodies are encoded as JSON.
+JSON conventions
+Top-level resources have an "object" property. This property can be used to determine the type of the resource (e.g. "database", "user", etc.)
+Top-level resources are addressable by a UUIDv4 "id" property. You may omit dashes from the ID when making requests to the API, e.g. when copying the ID from a Notion URL.
+Property names are in snake_case (not camelCase or kebab-case).
+Temporal values (dates and datetimes) are encoded in ISO 8601 strings. Datetimes will include the time value (2020-08-12T02:12:33.231Z) while dates will include only the date (2020-08-12)
+The Notion API does not support empty strings. To unset a string value for properties like a url Property value object, for example, use an explicit null instead of "".
+Code samples & SDKs
+Samples requests and responses are shown for each endpoint. Requests are shown using the Notion JavaScript SDK, and cURL. These samples make it easy to copy, paste, and modify as you build your integration.
+Notion SDKs are open source projects that you can install to easily start building. You may also choose any other language or library that allows you to make HTTP requests.
+Pagination
+Endpoints that return lists of objects support cursor-based pagination requests. By default, Notion returns ten items per API call. If the number of items in a response from a support endpoint exceeds the default, then an integration can use pagination to request a specific set of the results and/or to limit the number of returned items.
+Supported endpoints
+Responses
+If an endpoint supports pagination, then the response object contains the below fields.
+Parame...
+
+============================================================
+Timestamp: 2026-03-17T10:52:18.290Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T10:52:18.295Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T10:52:19.810Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T10:52:20.165Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T11:16:32.007Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T11:16:32.794Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T11:16:36.594Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-see-even-more-detail-3262d383c93080799fc6f307642347e1
+Page ID: 3262d383-c930-8079-9fc6-f307642347e1
+Title: Click me to see even more detail
+Content:
+Due date: 2026-03-17 | Click me to see even more detail
+Every item in your to do database table has a page that you can edit with content blocks (things like text, bullets, images etc.) - it’s just like editing any other document.
+Try the following:
+Click anywhere and start typing
+Type the / key to add all kinds of content — headers, pages, etc.
+Hover over this line, click and hold the : then drag to move it around
+This Database is configured as a Tasks database which allows its contents to appear on your Home tab. All tasks will make their way there.
+
+============================================================
+Timestamp: 2026-03-17T11:16:37.310Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-me-to-learn-how-to-hide-checked-items-3262d383c93080dca502facf24cccfc2
+Page ID: 3262d383-c930-80dc-a502-facf24cccfc2
+Title: Click me to learn how to hide checked items
+Content:
+Due date: 2026-03-17 | Click me to learn how to hide checked items
+From the list, click the  button to change your filters.
+Select “Status”. 
+Then check “To Do” and “In Progress” to only see unchecked items in the list. Click “Save for everyone” to finish.
+Notion Tip
+
+============================================================
+Timestamp: 2026-03-17T11:18:27.246Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-the-blue-New-button-to-add-a-task-3262d383c93080269feade3a19702951
+Page ID: 3262d383-c930-8026-9fea-de3a19702951
+Title: Click the blue New button to add a task
+Content:
+Due date: 2026-03-17 | Click the blue New button to add a task
+
+============================================================
+Timestamp: 2026-03-17T11:18:27.409Z
+Mode: sdk-page-read
+Query: https://www.notion.so/See-finished-items-in-the-Done-view-3262d383c93080749f87d78ad0e5c8e3
+Page ID: 3262d383-c930-8074-9f87-d78ad0e5c8e3
+Title: See finished items in the “Done” view
+Content:
+Due date: 2026-03-17 | See finished items in the “Done” view
+A “view” is a way to look at your data. It can be simple as preset filters to a full calendar of events — all using the same underlying data. 
+Click Done view to see just your finished tasks.
+
+============================================================
+Timestamp: 2026-03-17T11:19:18.108Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-the-blue-New-button-to-add-a-task-3262d383c93080269feade3a19702951
+Page ID: 3262d383-c930-8026-9fea-de3a19702951
+Title: Click the blue New button to add a task
+Content:
+Due date: 2026-03-17 | Click the blue New button to add a task
+
+============================================================
+Timestamp: 2026-03-17T11:19:18.179Z
+Mode: sdk-page-read
+Query: https://www.notion.so/Click-the-due-date-to-change-it-3262d383c93080209948ddb69836d3cb
+Page ID: 3262d383-c930-8020-9948-ddb69836d3cb
+Title: Click the due date to change it
+Content:
+Due date: 2026-03-17 | Click the due date to change it
+

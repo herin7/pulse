@@ -1,12 +1,71 @@
 export const MODELS = {
+  groq_llama: {
+    name: 'Llama 3.3 70B (Groq)',
+    provider: 'groq',
+    model: 'llama-3.3-70b-versatile',
+    endpoint: 'https://api.groq.com/openai/v1/chat/completions',
+    apiKeyEnv: 'GROQ_API_KEY',
+    free: true,
+    priority: 1,
+    timeoutMs: 8000,
+  },
+  gemini: {
+    name: 'Gemini 2.0 Flash Lite',
+    provider: 'google',
+    model: 'gemini-2.0-flash-lite',
+    endpoint: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+    apiKeyEnv: 'GEMINI_API_KEY',
+    free: true,
+    priority: 2,
+    timeoutMs: 10000,
+  },
+  sarvam: {
+    name: 'Sarvam 70B',
+    provider: 'sarvam',
+    model: 'sarvam-m',
+    endpoint: 'https://api.sarvam.ai/v1/chat/completions',
+    apiKeyEnv: 'SARVAM_API_KEY',
+    free: false,
+    priority: 3,
+    timeoutMs: 12000,
+  },
+  claude: {
+    name: 'Claude Sonnet',
+    provider: 'anthropic',
+    model: 'claude-sonnet-4-20250514',
+    endpoint: 'https://api.anthropic.com/v1/messages',
+    apiKeyEnv: 'ANTHROPIC_API_KEY',
+    free: false,
+    priority: 4,
+    timeoutMs: 15000,
+  },
   qwen_3_5: {
-    name: 'Qwen 3.5 122B (NVIDIA)',
+    name: 'Qwen QwQ 32B (NVIDIA)',
     provider: 'nvidia',
     model: 'qwen/qwq-32b',
     endpoint: 'https://integrate.api.nvidia.com/v1/chat/completions',
     apiKeyEnv: 'NVIDIA_API_KEY',
     free: true,
+    priority: 5,
+    timeoutMs: 12000,
+  },
+  deepseek_v3_1: {
+    name: 'DeepSeek V3.1 (NVIDIA)',
+    provider: 'nvidia',
+    model: 'deepseek-ai/deepseek-v3.1',
+    endpoint: 'https://integrate.api.nvidia.com/v1/chat/completions',
+    apiKeyEnv: 'NVIDIA_API_KEY',
+    free: true,
+    priority: 6,
+    timeoutMs: 16000,
+    extraBody: {
+      chat_template_kwargs: {
+        thinking: false,
+      },
+      temperature: 0.2,
+      top_p: 0.7,
+    },
   },
 };
 
-export const DEFAULT_MODEL = 'qwen_3_5';
+export const DEFAULT_MODEL = 'groq_llama';

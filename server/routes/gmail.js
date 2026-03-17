@@ -1,11 +1,12 @@
 import { Router } from 'express';
 
+import { sendAgentEmail } from '../agents/emailAgent.js';
 import { insertEmailAction } from '../db/emailActions.js';
 import { requireAuth } from '../middleware/auth.js';
 import { getAgentProfileForUser } from '../services/agentProfileService.js';
 import { AppError } from '../utils/AppError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { isGmailConfigured, sendGmailMessage } from '../utils/gmail.js';
+import { isGmailConfigured } from '../utils/gmail.js';
 
 const router = Router();
 
@@ -39,7 +40,7 @@ router.post('/send', requireAuth, asyncHandler(async (req, res) => {
   }
 
   const agentProfile = await loadGmailProfile(req.user._id);
-  const result = await sendGmailMessage({ to, subject, body, agentProfile });
+  const result = await sendAgentEmail({ to, subject, body, agentProfile });
   const emailAction = await insertEmailAction({
     userId: req.user.id,
     toEmail: to,

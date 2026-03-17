@@ -1,6 +1,7 @@
 import { AgentProfile } from '../db/models/AgentProfile.js';
+import { sendAgentEmail } from './emailAgent.js';
 import { claimDueScheduledEmailActions, markEmailActionFailed, markEmailActionSent } from '../db/emailActions.js';
-import { isGmailConfigured, sendGmailMessage } from '../utils/gmail.js';
+import { isGmailConfigured } from '../utils/gmail.js';
 import { logger } from '../utils/logger.js';
 
 let isRunning = false;
@@ -22,7 +23,7 @@ export async function runScheduledEmailQueue() {
           throw new Error('No Gmail connection available for this user');
         }
 
-        const result = await sendGmailMessage({ to: email.toEmail, subject: email.subject, body: email.body, agentProfile });
+        const result = await sendAgentEmail({ to: email.toEmail, subject: email.subject, body: email.body, agentProfile });
         await markEmailActionSent({ id: email.id, providerMessageId: result.id, threadId: result.threadId });
       } catch (error) {
         logger.error('Scheduled email send failed', { emailActionId: email.id, error: error.message });

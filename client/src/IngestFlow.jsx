@@ -5,7 +5,9 @@ const SOURCE_ITEMS = [
   { key: 'selfReport', label: 'Self report', hint: 'Your AI self-summary + notes' },
   { key: 'linkedin', label: 'LinkedIn', hint: 'Career context and work history' },
   { key: 'github', label: 'GitHub', hint: 'Repos, languages, and shipping signal' },
+  { key: 'notion', label: 'Notion', hint: 'Founder docs, notes, and workspace context' },
 ];
+const REQUIRED_SOURCE_KEYS = ['selfReport', 'linkedin', 'github'];
 
 function SourceStatusCard({
   item,
@@ -112,7 +114,7 @@ export default function IngestFlow({ formData, onComplete }) {
   }, [statuses]);
 
   const allFailed = useMemo(
-    () => SOURCE_ITEMS.every(({ key }) => statuses[key] === 'failed'),
+    () => REQUIRED_SOURCE_KEYS.every((key) => statuses[key] === 'failed'),
     [statuses],
   );
 
@@ -175,7 +177,7 @@ export default function IngestFlow({ formData, onComplete }) {
         <div className="px-8 py-8 flex-1">
           <div className="mb-4 flex items-center justify-between gap-3">
             <p className="text-sm text-neutral-600">
-              Failed sources can be retried, skipped, or deferred. Chat only blocks if all three fail.
+              Failed sources can be retried, skipped, or deferred. Chat only blocks if GitHub, LinkedIn, and self report all fail.
             </p>
             <span className="text-xs text-neutral-400">{progress}%</span>
           </div>
@@ -197,7 +199,7 @@ export default function IngestFlow({ formData, onComplete }) {
 
           {allFailed && (
             <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              All three sources failed together. Retry at least one source or skip one to continue.
+              GitHub, LinkedIn, and self report all failed together. Retry at least one source or skip one to continue.
             </div>
           )}
 

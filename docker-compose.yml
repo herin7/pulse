@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  pulse-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pulse-server
+    env_file:
+      - ./server/.env
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./server/db:/app/server/db
+    restart: unless-stopped

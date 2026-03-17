@@ -1,12 +1,27 @@
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 
+import { logger } from '../utils/logger.js';
 import {
   qdrantClient,
   QDRANT_COLLECTION,
   QDRANT_NAMESPACE,
+  QDRANT_VECTOR_SIZE,
 } from './qdrantClient.js';
 
+function isValidVector(vector, expectedSize = QDRANT_VECTOR_SIZE) {
+  return Array.isArray(vector)
+    && vector.length === expectedSize
+    && vector.every((value) => Number.isFinite(value));
+}
+
 export async function upsertChunks(userId, chunks) {
+  const invalidChunk = chunks.find((chunk) => !isValidVector(chunk.embedding));
+  if (invalidChunk) {
+    const error = new Error('Invalid embedding vector for chunk upsert');
+    error.code = 'INVALID_EMBEDDING_VECTOR';
+    throw error;
+  }
+
   const normalizedPoints = chunks.map((chunk) => {
     const chunkIndex = Number.isInteger(chunk.index)
       ? chunk.index
@@ -42,7 +57,7 @@ export async function upsertChunks(userId, chunks) {
 }
 
 export async function upsertChatMemory(userId, text, embedding) {
-  if (!text || !embedding) {
+  if (!text || !isValidVector(embedding)) {
     return;
   }
 
@@ -67,7 +82,7 @@ export async function upsertChatMemory(userId, text, embedding) {
 export async function upsertDurableMemory(userId, facts, embedding) {
   const normalizedFacts = (facts || []).map((fact) => fact.trim()).filter(Boolean);
 
-  if (!normalizedFacts.length || !embedding) {
+  if (!normalizedFacts.length || !isValidVector(embedding)) {
     return;
   }
 
@@ -93,36 +108,63 @@ export async function upsertDurableMemory(userId, facts, embedding) {
 }
 
 export async function searchSimilar(userId, queryEmbedding, topK = 5) {
-  const results = await qdrantClient.search(QDRANT_COLLECTION, {
-    vector: queryEmbedding,
-    limit: Math.max(topK * 3, 8),
-    filter: {
-      must: [
-        { key: 'userId', match: { value: userId } },
-        { key: 'type', match: { value: 'chunk' } },
-      ],
-    },
-    with_payload: true,
-  });
+  if (!isValidVector(queryEmbedding)) {
+    return [];
+  }
 
-  return rankSearchResults(results).slice(0, topK);
+  try {
+    const results = await qdrantClient.search(QDRANT_COLLECTION, {
+      vector: queryEmbedding,
+      limit: Math.max(topK * 3, 8),
+      filter: {
+        must: [
+          { key: 'userId', match: { value: userId } },
+          { key: 'type', match: { value: 'chunk' } },
+        ],
+      },
+      with_payload: true,
+    });
+
+    return rankSearchResults(results).slice(0, topK);
+  } catch (error) {
+    logger.warn('Qdrant similarity search failed', {
+      code: error.code,
+      error: error.message,
+      userId,
+    });
+    return [];
+  }
 }
 
 export async function searchWithFilter(userId, queryEmbedding, source, limit = 10) {
-  const results = await qdrantClient.search(QDRANT_COLLECTION, {
-    vector: queryEmbedding,
-    limit: Math.max(limit * 3, 8),
-    filter: {
-      must: [
-        { key: 'userId', match: { value: userId } },
-        { key: 'type', match: { value: 'chunk' } },
-        { key: 'source', match: { value: source } },
-      ],
-    },
-    with_payload: true,
-  });
+  if (!isValidVector(queryEmbedding)) {
+    return [];
+  }
 
-  return rankSearchResults(results).slice(0, limit);
+  try {
+    const results = await qdrantClient.search(QDRANT_COLLECTION, {
+      vector: queryEmbedding,
+      limit: Math.max(limit * 3, 8),
+      filter: {
+        must: [
+          { key: 'userId', match: { value: userId } },
+          { key: 'type', match: { value: 'chunk' } },
+          { key: 'source', match: { value: source } },
+        ],
+      },
+      with_payload: true,
+    });
+
+    return rankSearchResults(results).slice(0, limit);
+  } catch (error) {
+    logger.warn('Qdrant filtered search failed', {
+      code: error.code,
+      error: error.message,
+      source,
+      userId,
+    });
+    return [];
+  }
 }
 
 function rankSearchResults(results) {

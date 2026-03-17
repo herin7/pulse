@@ -1,10 +1,11 @@
 import { logger } from './logger.js';
 
-const RERANKER_ENDPOINT = 'https://ai.api.nvidia.com/v1/retrieval/nvidia/nv-rerankqa-mistral-4b-v3/reranking';
-const RERANKER_MODEL = 'nvidia/nv-rerankqa-mistral-4b-v3';
+const RERANKER_ENDPOINT = 'https://ai.api.nvidia.com/v1/retrieval/nvidia/llama-3.2-nv-rerankqa-1b-v2/reranking';
+const RERANKER_MODEL = 'nvidia/llama-3.2-nv-rerankqa-1b-v2';
+let rerankerTemporarilyDisabled = false;
 
 function isRerankerEnabled() {
-  return String(process.env.RERANKER_ENABLED || '').toLowerCase() === 'true';
+  return !rerankerTemporarilyDisabled && String(process.env.RERANKER_ENABLED || '').toLowerCase() === 'true';
 }
 
 function extractRankings(payload) {
@@ -56,7 +57,16 @@ export async function rerankChunks(query, chunks, topK = 3) {
     });
 
     if (!response.ok) {
-      throw new Error(await response.text());
+      const detail = await response.text();
+      if (response.status === 404 || response.status === 410) {
+        rerankerTemporarilyDisabled = true;
+        logger.warn('Disabling reranker after provider 404/410', {
+          endpoint: RERANKER_ENDPOINT,
+          model: RERANKER_MODEL,
+          statusCode: response.status,
+        });
+      }
+      throw new Error(detail);
     }
 
     const data = await response.json();

@@ -28,7 +28,10 @@ export function isGmailOAuthConfigured() {
 }
 
 export function isGlobalGmailConfigured() {
-  return Boolean(isGmailOAuthConfigured() && process.env.GMAIL_REFRESH_TOKEN);
+  return Boolean(
+    process.env.GMAIL_ACCESS_TOKEN ||
+    (isGmailOAuthConfigured() && process.env.GMAIL_REFRESH_TOKEN)
+  );
 }
 
 export function isGmailConfigured(agentProfile = null) {

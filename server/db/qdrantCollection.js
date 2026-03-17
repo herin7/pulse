@@ -16,28 +16,35 @@ async function ensurePayloadIndex(fieldName) {
   } catch {}
 }
 
-export async function ensureCollection() {
+function readVectorSize(info) {
+  const vectors = info?.config?.params?.vectors;
+  return typeof vectors?.size === 'number' ? vectors.size : null;
+}
+
+async function createCollection(vectorSize) {
+  await qdrantClient.createCollection(QDRANT_COLLECTION, {
+    vectors: { size: vectorSize, distance: 'Cosine' },
+  });
+}
+
+export async function ensureCollection(expectedVectorSize = QDRANT_VECTOR_SIZE) {
   const collections = await qdrantClient.getCollections();
   const exists = collections.collections.some((item) => item.name === QDRANT_COLLECTION);
 
   if (exists) {
     const info = await qdrantClient.getCollection(QDRANT_COLLECTION);
-    const currentSize = info.config.params.vectors.size;
+    const currentSize = readVectorSize(info);
 
-    if (currentSize !== QDRANT_VECTOR_SIZE) {
+    if (currentSize !== expectedVectorSize) {
       logger.warn('Recreating Qdrant collection for vector size drift', {
-        expectedSize: QDRANT_VECTOR_SIZE,
+        expectedSize: expectedVectorSize,
         existingSize: currentSize,
       });
       await qdrantClient.deleteCollection(QDRANT_COLLECTION);
-      await qdrantClient.createCollection(QDRANT_COLLECTION, {
-        vectors: { size: QDRANT_VECTOR_SIZE, distance: 'Cosine' },
-      });
+      await createCollection(expectedVectorSize);
     }
   } else {
-    await qdrantClient.createCollection(QDRANT_COLLECTION, {
-      vectors: { size: QDRANT_VECTOR_SIZE, distance: 'Cosine' },
-    });
+    await createCollection(expectedVectorSize);
   }
 
   await Promise.all([ensurePayloadIndex('userId'), ensurePayloadIndex('type')]);

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const MAX_STORED_MESSAGES = 50;
+const MAX_HISTORY_CONTENT_CHARS = 2000;
 const FALLBACK_REPLY = 'Something went wrong. Try again.';
 
 function buildStorageKey(userId) {
@@ -9,6 +10,12 @@ function buildStorageKey(userId) {
 
 function trimMessages(messages) {
   return messages.slice(-MAX_STORED_MESSAGES);
+}
+
+function trimContent(text, max = MAX_HISTORY_CONTENT_CHARS) {
+  if (!text) return '';
+  const value = String(text);
+  return value.length > max ? `${value.slice(0, max)}...` : value;
 }
 
 function createMessageId() {
@@ -92,7 +99,10 @@ export default function useChat({ userId }) {
     const historyForRequest = trimMessages([
       ...messagesRef.current.filter((item) => !item.isThinking),
       userMessage,
-    ]);
+    ]).map((item) => ({
+      content: trimContent(item.content, MAX_HISTORY_CONTENT_CHARS),
+      role: item.role,
+    }));
 
     setError(null);
     setIsLoading(true);
@@ -105,6 +115,7 @@ export default function useChat({ userId }) {
         role: 'assistant',
         content: normalizeReplyText(result),
         sources: Array.isArray(result?.sources) ? result.sources : [],
+        syncedServices: Array.isArray(result?.syncedServices) ? result.syncedServices : [],
       };
 
       setMessages((prev) => trimMessages(prev.map((item) => (

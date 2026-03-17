@@ -65,3 +65,8 @@ export async function initDb() {
     client.release();
   }
 }
+
+export async function closeDb() {
+  await pool.end();
+  logger.info('PostgreSQL pool closed');
+}

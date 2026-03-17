@@ -20,6 +20,12 @@ const DEFAULT_CHARACTER_CARD = {
   biggestRisk: 'Losing context between sessions.',
   operatingStyle: 'Direct, concise, and execution-first.',
 };
+const SOURCE_META = {
+  selfReport: { hint: 'Your AI self-summary + notes', label: 'Self report' },
+  linkedin: { hint: 'Career context and work history', label: 'LinkedIn' },
+  github: { hint: 'Repos, languages, and shipping signal', label: 'GitHub' },
+  notion: { hint: 'Founder notes, docs, and workspace context', label: 'Notion' },
+};
 
 function splitSentences(text) {
   return text
@@ -121,8 +127,21 @@ function getInitials(name) {
   return (parts.map((part) => part[0]?.toUpperCase()).join('') || 'P').slice(0, 2);
 }
 
-function getModelMeta(activeModel) {
-  return CLIENT_MODELS.find((model) => model.key === activeModel) || CLIENT_MODELS[0];
+function getModelMeta(activeModel, modelOptions = DEFAULT_CLIENT_MODELS) {
+  return modelOptions.find((model) => model.key === activeModel) || modelOptions[0];
+}
+
+function getSourceStatusCopy(source, status, detail) {
+  if (source === 'notion') {
+    if (status === 'not_configured') return 'Add NOTION_API_KEY to enable.';
+    if (status === 'empty') return 'Connected, but no relevant pages were found. Share pages with your integration in Notion.';
+    if (status === 'success') return `Connected ✓${detail?.pagesIndexed ? ` - ${detail.pagesIndexed} page${detail.pagesIndexed === 1 ? '' : 's'} indexed` : ''}`;
+  }
+  if (status === 'success') return 'Ready';
+  if (status === 'skipped') return 'Skipped for now';
+  if (status === 'failed') return 'Needs attention';
+  if (status === 'loading') return 'Refreshing...';
+  return 'Idle';
 }
 
 function renderInlineFormatting(text) {
@@ -176,7 +195,7 @@ function VoiceStandupCard({
           {selectedVoiceName && (
             <p className="mt-1 text-xs text-emerald-800">Pulse voice: {selectedVoiceName}</p>
           )}
-          </div>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={onToggleConversationMode}
@@ -467,8 +486,8 @@ function ToastStack({ toasts, onDismiss }) {
   );
 }
 
-function ChatHeader({ profile, activeModel, isReady, voiceEnabled, isListening, hasReminderQueue }) {
-  const modelMeta = getModelMeta(activeModel);
+function ChatHeader({ profile, activeModel, isReady, voiceEnabled, isListening, hasReminderQueue, modelOptions }) {
+  const modelMeta = getModelMeta(activeModel, modelOptions);
 
   return (
     <div className="chat-header-shell">
@@ -519,6 +538,7 @@ function EmptyConversationState({ profile }) {
 const MessageRow = memo(function MessageRow({ message, profile }) {
   const isUser = message.role === 'user';
   const sources = useMemo(() => [...new Set(message.sources || [])], [message.sources]);
+  const syncedServices = useMemo(() => [...new Set(message.syncedServices || [])], [message.syncedServices]);
 
   return (
     <div className={`chat-message-row chat-message-row-animate ${isUser ? 'chat-message-row-user' : ''}`}>
@@ -540,18 +560,18 @@ const MessageRow = memo(function MessageRow({ message, profile }) {
           </div>
         ) : (
           <div className={isUser ? 'chat-bubble-user' : 'chat-bubble-ai'}>
-          {renderMessageContent(message.content)}
-          {message.files && message.files.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2 pt-2 border-t border-white/20">
-              {message.files.map((file, i) => (
-                <div key={i} className="flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded text-[10px] font-medium">
-                  <span>📎</span>
-                  <span className="truncate max-w-[120px]">{file.name}</span>
-                  <span className="opacity-60 lowercase">({file.type?.split('/')[1] || 'file'})</span>
-                </div>
-              ))}
-            </div>
-          )}
+            {renderMessageContent(message.content)}
+            {message.files && message.files.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2 pt-2 border-t border-white/20">
+                {message.files.map((file, i) => (
+                  <div key={i} className="flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded text-[10px] font-medium">
+                    <span>📎</span>
+                    <span className="truncate max-w-[120px]">{file.name}</span>
+                    <span className="opacity-60 lowercase">({file.type?.split('/')[1] || 'file'})</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
         {sources.length > 0 && (
@@ -559,6 +579,15 @@ const MessageRow = memo(function MessageRow({ message, profile }) {
             {sources.map((source) => (
               <span key={`${message.role}-${source}`} className="chat-source-pill">
                 {source}
+              </span>
+            ))}
+          </div>
+        )}
+        {syncedServices.length > 0 && (
+          <div className="chat-source-row">
+            {syncedServices.map((service) => (
+              <span key={`${message.role}-sync-${service}`} className="chat-source-pill">
+                {`Synced to ${service.charAt(0).toUpperCase()}${service.slice(1)}`}
               </span>
             ))}
           </div>
@@ -573,8 +602,8 @@ const MessageRow = memo(function MessageRow({ message, profile }) {
   );
 });
 
-function ComposerStatusBar({ activeModel, speechSupported, isListening, voiceEnabled, isReady }) {
-  const modelMeta = getModelMeta(activeModel);
+function ComposerStatusBar({ activeModel, speechSupported, isListening, voiceEnabled, isReady, modelOptions }) {
+  const modelMeta = getModelMeta(activeModel, modelOptions);
 
   return (
     <div className="composer-status-row">
@@ -614,6 +643,7 @@ function Sidebar({
   lastRefreshed,
   profileLoading,
   ingestStatuses,
+  ingestDetails,
   onRefetchProfiles,
   refetchingProfiles,
 }) {
@@ -621,12 +651,6 @@ function Sidebar({
   const today = new Date().toDateString();
   const updatedCount = competitorStatus?.filter((c) => c.lastFetched && new Date(c.lastFetched).toDateString() === today).length || 0;
   const totalCount = competitorStatus?.length || 0;
-  const sourceLabels = {
-    selfReport: 'Self report',
-    linkedin: 'LinkedIn',
-    github: 'GitHub',
-  };
-
   return (
     <aside className="w-64 bg-gray-50 border-r border-neutral-200 p-5 overflow-y-auto flex-shrink-0">
       <h2 className="text-lg font-semibold text-neutral-800">{profile.name}</h2>
@@ -642,40 +666,40 @@ function Sidebar({
         </div>
       ) : (
         <>
-      <Section title="Building">{profile.building}</Section>
-      <Section title="Stage">{profile.stage}</Section>
-      <Section title="Core Drive">{profile.coreDrive}</Section>
-      <Section title="North Star">{profile.northStar}</Section>
+          <Section title="Building">{profile.building}</Section>
+          <Section title="Stage">{profile.stage}</Section>
+          <Section title="Core Drive">{profile.coreDrive}</Section>
+          <Section title="North Star">{profile.northStar}</Section>
 
-      <SectionLabel title="Tech Stack" />
-      <div className="flex flex-wrap gap-1.5 mb-4">
-        {profile.techStack?.map((t) => (
-          <span key={t} className="bg-neutral-200 text-neutral-600 px-2 py-0.5 rounded text-xs">{t}</span>
-        ))}
-      </div>
+          <SectionLabel title="Tech Stack" />
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {profile.techStack?.map((t) => (
+              <span key={t} className="bg-neutral-200 text-neutral-600 px-2 py-0.5 rounded text-xs">{t}</span>
+            ))}
+          </div>
 
-      <SectionLabel title="Founder Strengths" />
-      <ul className="mb-4 space-y-1">
-        {profile.founderStrengths?.map((s) => (
-          <li key={s} className="text-green-700 text-sm flex items-start gap-2">
-            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
-            {s}
-          </li>
-        ))}
-      </ul>
+          <SectionLabel title="Founder Strengths" />
+          <ul className="mb-4 space-y-1">
+            {profile.founderStrengths?.map((s) => (
+              <li key={s} className="text-green-700 text-sm flex items-start gap-2">
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
+                {s}
+              </li>
+            ))}
+          </ul>
 
-      <SectionLabel title="Blind Spots" />
-      <ul className="mb-4 space-y-1">
-        {profile.blindspots?.map((b) => (
-          <li key={b} className="text-amber-700 text-sm flex items-start gap-2">
-            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
-            {b}
-          </li>
-        ))}
-      </ul>
+          <SectionLabel title="Blind Spots" />
+          <ul className="mb-4 space-y-1">
+            {profile.blindspots?.map((b) => (
+              <li key={b} className="text-amber-700 text-sm flex items-start gap-2">
+                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
+                {b}
+              </li>
+            ))}
+          </ul>
 
-      <Section title="Biggest Risk">{profile.biggestRisk}</Section>
-      <Section title="Operating Style">{profile.operatingStyle}</Section>
+          <Section title="Biggest Risk">{profile.biggestRisk}</Section>
+          <Section title="Operating Style">{profile.operatingStyle}</Section>
         </>
       )}
 
@@ -699,8 +723,8 @@ function Sidebar({
                 <div className="flex items-center justify-between">
                   <span className="text-neutral-700 text-xs font-medium">{c.name}</span>
                   <span className={`text-xs px-1.5 py-0.5 rounded ${c.urgency === 'high' ? 'bg-red-100 text-red-700' :
-                      c.urgency === 'medium' ? 'bg-amber-100 text-amber-700' :
-                        'bg-neutral-100 text-neutral-500'
+                    c.urgency === 'medium' ? 'bg-amber-100 text-amber-700' :
+                      'bg-neutral-100 text-neutral-500'
                     }`}>{c.urgency || 'no data'}</span>
                 </div>
                 {c.latestSummary
@@ -743,11 +767,25 @@ function Sidebar({
         >
           {refetchingProfiles ? 'Re-fetching profiles...' : 'Re-fetch profiles'}
         </button>
-        <div className="mt-2 space-y-1">
-          {Object.entries(sourceLabels).map(([source, label]) => (
-            <div key={source} className="flex items-center justify-between text-[11px] text-neutral-500">
-              <span>{label}</span>
-              <span className="capitalize">{ingestStatuses?.[source] || 'idle'}</span>
+        <div className="mt-3 space-y-2">
+          {Object.entries(SOURCE_META).map(([source, meta]) => (
+            <div key={source} className="rounded-xl border border-neutral-200 bg-white px-3 py-2">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xs font-medium text-neutral-700">{meta.label}</span>
+                <span className="text-[10px] uppercase tracking-[0.14em] text-neutral-400">{ingestStatuses?.[source] || 'idle'}</span>
+              </div>
+              <p className="mt-1 text-[11px] leading-5 text-neutral-500">
+                {getSourceStatusCopy(source, ingestStatuses?.[source] || 'idle', ingestDetails?.[source])}
+              </p>
+              {source === 'notion' && (
+                <p className="mt-1 text-[11px] leading-5 text-neutral-400">
+                  To connect: go to{' '}
+                  <a href="https://www.notion.so/my-integrations" target="_blank" rel="noreferrer" className="text-neutral-600 underline underline-offset-2">
+                    notion.so/my-integrations
+                  </a>
+                  {' '}→ create integration → copy secret → share your pages with the integration.
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -776,23 +814,27 @@ function Section({ title, children }) {
   );
 }
 
-const CLIENT_MODELS = [
-  { key: 'gemini', name: 'Gemini 2.0 Flash', free: true },
+const DEFAULT_CLIENT_MODELS = [
   { key: 'groq_llama', name: 'Llama 3.3 70B (Groq)', free: true },
-  { key: 'sarvam', name: 'Sarvam 105B', free: false },
-  { key: 'claude', name: 'Claude Sonnet (Anthropic)', free: false },
+  { key: 'gemini', name: 'Gemini 2.0 Flash Lite', free: true },
+  { key: 'sarvam', name: 'Sarvam 70B', free: false },
+  { key: 'claude', name: 'Claude Sonnet', free: false },
+  { key: 'qwen_3_5', name: 'Qwen QwQ 32B (NVIDIA)', free: true },
 ];
 
 export default function Chat({ characterCard }) {
   const userId = localStorage.getItem('lc_user_id') || 'anonymous';
+
   const [input, setInput] = useState('');
   const { messages, sendMessage, clearHistory, isLoading, appendMessage } = useChat({ userId });
   const { profile: loadedProfile, refetch: refetchProfile, isLoading: profileLoading, error: profileError } = useProfile({
     userId,
     initialCharacterCard: characterCard,
   });
+
   const [toasts, setToasts] = useState([]);
-  const [activeModel, setActiveModel] = useState('gemini');
+  const [activeModel, setActiveModel] = useState('groq_llama');
+  const [modelOptions, setModelOptions] = useState(DEFAULT_CLIENT_MODELS);
   const [refreshing, setRefreshing] = useState(false);
   const [competitorStatus, setCompetitorStatus] = useState(null);
   const [lastRefreshed, setLastRefreshed] = useState(null);
@@ -813,7 +855,19 @@ export default function Chat({ characterCard }) {
   const [draftActionLoading, setDraftActionLoading] = useState(false);
   const [showScheduleComposer, setShowScheduleComposer] = useState(false);
   const [refetchingProfiles, setRefetchingProfiles] = useState(false);
+  const dismissToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((item) => item.id !== id));
+  }, []);
+
+  const showToast = useCallback((message, type = 'info') => {
+    const id = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    setToasts((prev) => [...prev, { id, message, type }].slice(-3));
+    window.setTimeout(() => {
+      dismissToast(id);
+    }, 4000);
+  }, [dismissToast]);
   const onboardingData = useMemo(() => {
+
     try {
       const saved = sessionStorage.getItem(`pulse_onboarding_${userId}`);
       if (!saved) return null;
@@ -823,7 +877,7 @@ export default function Chat({ characterCard }) {
       return null;
     }
   }, [userId]);
-  const { statuses: ingestStatuses, refetchSource, proceedWithSkipped } = useIngest();
+  const { details: ingestDetails, statuses: ingestStatuses, refetchSource, proceedWithSkipped } = useIngest();
   const { isReady } = useEmbeddings();
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
@@ -865,7 +919,7 @@ export default function Chat({ characterCard }) {
     if (recognitionRef.current && isListening) {
       try {
         recognitionRef.current.stop();
-      } catch (error) {}
+      } catch (error) { }
     }
   }, [clearVoiceAutoSendTimer, isListening]);
 
@@ -910,7 +964,7 @@ export default function Chat({ characterCard }) {
     if (recognitionRef.current && isListening) {
       try {
         recognitionRef.current.stop();
-      } catch (error) {}
+      } catch (error) { }
     }
 
     inputModeRef.current = 'voice';
@@ -921,7 +975,7 @@ export default function Chat({ characterCard }) {
     if (!window.confirm('This will clear your profile and restart onboarding. Are you sure?')) return;
     try {
       await fetch('/api/session', { method: 'DELETE', credentials: 'include' });
-    } catch (e) {}
+    } catch (e) { }
     clearHistory();
     localStorage.removeItem('pulse_token');
     window.location.reload();
@@ -939,7 +993,7 @@ export default function Chat({ characterCard }) {
         setCompetitorStatus(data.competitors);
         return data;
       }
-    } catch (e) {}
+    } catch (e) { }
     return null;
   }, []);
 
@@ -998,14 +1052,15 @@ export default function Chat({ characterCard }) {
     }
 
     const labels = {
-      selfReport: 'Self report',
-      linkedin: 'LinkedIn',
       github: 'GitHub',
+      linkedin: 'LinkedIn',
+      notion: 'Notion',
+      selfReport: 'Self report',
     };
 
     setRefetchingProfiles(true);
     try {
-      await Promise.all(['selfReport', 'linkedin', 'github'].map(async (source) => {
+      await Promise.all(['selfReport', 'linkedin', 'github', 'notion'].map(async (source) => {
         try {
           await refetchSource(source, onboardingData);
           showToast(`${labels[source]} refreshed`);
@@ -1031,7 +1086,14 @@ export default function Chat({ characterCard }) {
       credentials: 'include'
     })
       .then((r) => r.json())
-      .then((d) => setActiveModel(d.activeModel))
+      .then((d) => {
+        if (Array.isArray(d.models) && d.models.length > 0) {
+          setModelOptions(d.models);
+        }
+        if (d.activeModel) {
+          setActiveModel(d.activeModel);
+        }
+      })
       .catch(() => showToast('Could not load model config', 'error'));
   }, [showToast]);
 
@@ -1049,10 +1111,11 @@ export default function Chat({ characterCard }) {
         credentials: 'include',
         body: JSON.stringify({ modelKey }),
       });
+      showToast(`Switched to ${getModelMeta(modelKey, modelOptions)?.name || modelKey}`);
     } catch (err) {
       showToast('Failed to switch model', 'error');
     }
-  }, [showToast]);
+  }, [modelOptions, showToast]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -1145,17 +1208,6 @@ export default function Chat({ characterCard }) {
     };
   }, []);
 
-  const dismissToast = useCallback((id) => {
-    setToasts((prev) => prev.filter((item) => item.id !== id));
-  }, []);
-
-  const showToast = useCallback((message, type = 'info') => {
-    const id = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    setToasts((prev) => [...prev, { id, message, type }].slice(-3));
-    window.setTimeout(() => {
-      dismissToast(id);
-    }, 4000);
-  }, [dismissToast]);
 
   useEffect(() => {
     if (profileError?.message) {
@@ -1280,7 +1332,7 @@ export default function Chat({ characterCard }) {
           });
         });
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [queueReminders]);
 
   useEffect(() => {
@@ -1523,6 +1575,10 @@ export default function Chat({ characterCard }) {
         setConversationStatus('Saved to memory. Pulse is replying...');
       }
 
+      if (data.fallbackUsed && data.modelUsed) {
+        showToast(`Primary model failed. Pulse used ${data.modelUsed}.`);
+      }
+
       speakPulseReply(assistantMessage?.content || normalizeAssistantReply(data.reply));
     } catch (err) {
       if (inputMode === 'voice') {
@@ -1580,6 +1636,7 @@ export default function Chat({ characterCard }) {
             lastRefreshed={lastRefreshed}
             profileLoading={profileLoading}
             ingestStatuses={ingestStatuses}
+            ingestDetails={ingestDetails}
             onRefetchProfiles={handleRefetchProfiles}
             refetchingProfiles={refetchingProfiles}
           />
@@ -1589,6 +1646,7 @@ export default function Chat({ characterCard }) {
               <ChatHeader
                 profile={profile}
                 activeModel={activeModel}
+                modelOptions={modelOptions}
                 isReady={isReady}
                 voiceEnabled={voiceEnabled}
                 isListening={isListening}
@@ -1709,7 +1767,7 @@ export default function Chat({ characterCard }) {
                       {selectedFiles.map((file, i) => (
                         <span key={i} className="bg-slate-100 text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 group">
                           {file.name}
-                          <button 
+                          <button
                             onClick={() => setSelectedFiles(prev => prev.filter((_, idx) => idx !== i))}
                             className="text-neutral-400 hover:text-red-500"
                           >
@@ -1727,7 +1785,7 @@ export default function Chat({ characterCard }) {
                       value={activeModel}
                       onChange={handleModelChange}
                     >
-                      {CLIENT_MODELS.map((m) => (
+                      {modelOptions.map((m) => (
                         <option key={m.key} value={m.key}>
                           {m.name}{m.free ? '' : ' (paid)'}
                         </option>
