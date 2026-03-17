@@ -1,5 +1,8 @@
-import { Fragment, useState, useRef, useEffect, useCallback } from 'react';
+import { Fragment, memo, useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import useEmbeddings from './useEmbeddings';
+import useChat from './store/useChat';
+import useProfile from './store/useProfile';
+import useIngest from './store/useIngest';
 
 const MOVED_KEYWORDS = ['shipped', 'completed', 'finished', 'launched', 'fixed', 'sent', 'closed', 'done', 'met', 'talked'];
 const STALLED_KEYWORDS = ['forgot', 'still', 'blocked', 'stuck', 'delayed', 'waiting', "didn't", 'did not', "haven't", 'pending'];
@@ -173,7 +176,7 @@ function VoiceStandupCard({
           {selectedVoiceName && (
             <p className="mt-1 text-xs text-emerald-800">Pulse voice: {selectedVoiceName}</p>
           )}
-        </div>
+          </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={onToggleConversationMode}
@@ -439,6 +442,31 @@ function ReminderPopup({ reminder, onDismiss }) {
   );
 }
 
+function ToastStack({ toasts, onDismiss }) {
+  if (!toasts.length) return null;
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 flex w-[min(360px,92vw)] flex-col gap-2">
+      {toasts.map((toast) => (
+        <div
+          key={toast.id}
+          className={`rounded-xl border px-4 py-3 text-sm shadow-lg transition-all ${toast.type === 'error' ? 'border-red-200 bg-red-50 text-red-700' : 'border-neutral-700 bg-neutral-900 text-white'}`}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <p>{toast.message}</p>
+            <button
+              onClick={() => onDismiss(toast.id)}
+              className={`text-xs ${toast.type === 'error' ? 'text-red-500' : 'text-neutral-300 hover:text-white'}`}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ChatHeader({ profile, activeModel, isReady, voiceEnabled, isListening, hasReminderQueue }) {
   const modelMeta = getModelMeta(activeModel);
 
@@ -488,12 +516,12 @@ function EmptyConversationState({ profile }) {
   );
 }
 
-function MessageRow({ message, profile }) {
+const MessageRow = memo(function MessageRow({ message, profile }) {
   const isUser = message.role === 'user';
-  const sources = [...new Set(message.sources || [])];
+  const sources = useMemo(() => [...new Set(message.sources || [])], [message.sources]);
 
   return (
-    <div className={`chat-message-row ${isUser ? 'chat-message-row-user' : ''}`}>
+    <div className={`chat-message-row chat-message-row-animate ${isUser ? 'chat-message-row-user' : ''}`}>
       {!isUser && (
         <div className="chat-message-avatar chat-message-avatar-ai">
           <span>{getInitials(profile.name)}</span>
@@ -504,7 +532,14 @@ function MessageRow({ message, profile }) {
           <span className="chat-message-author">{isUser ? 'You' : profile.name}</span>
           <span className="chat-message-badge">{isUser ? 'Founder' : 'Cofounder'}</span>
         </div>
-        <div className={isUser ? 'chat-bubble-user' : 'chat-bubble-ai'}>
+        {message.isThinking ? (
+          <div className="chat-thinking">
+            <span className="chat-typing-dot" />
+            <span className="chat-typing-dot" />
+            <span className="chat-typing-dot" />
+          </div>
+        ) : (
+          <div className={isUser ? 'chat-bubble-user' : 'chat-bubble-ai'}>
           {renderMessageContent(message.content)}
           {message.files && message.files.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2 pt-2 border-t border-white/20">
@@ -517,7 +552,8 @@ function MessageRow({ message, profile }) {
               ))}
             </div>
           )}
-        </div>
+          </div>
+        )}
         {sources.length > 0 && (
           <div className="chat-source-row">
             {sources.map((source) => (
@@ -535,7 +571,7 @@ function MessageRow({ message, profile }) {
       )}
     </div>
   );
-}
+});
 
 function ComposerStatusBar({ activeModel, speechSupported, isListening, voiceEnabled, isReady }) {
   const modelMeta = getModelMeta(activeModel);
@@ -566,11 +602,30 @@ function ComposerStatusBar({ activeModel, speechSupported, isListening, voiceEna
 
 
 
-function Sidebar({ characterCard, handleReset, competitorStatus, showPanel, setShowPanel, hasHighUrgency, refreshing, handleRefreshIntel, lastRefreshed }) {
+function Sidebar({
+  characterCard,
+  handleReset,
+  competitorStatus,
+  showPanel,
+  setShowPanel,
+  hasHighUrgency,
+  refreshing,
+  handleRefreshIntel,
+  lastRefreshed,
+  profileLoading,
+  ingestStatuses,
+  onRefetchProfiles,
+  refetchingProfiles,
+}) {
   const profile = characterCard || DEFAULT_CHARACTER_CARD;
   const today = new Date().toDateString();
   const updatedCount = competitorStatus?.filter((c) => c.lastFetched && new Date(c.lastFetched).toDateString() === today).length || 0;
   const totalCount = competitorStatus?.length || 0;
+  const sourceLabels = {
+    selfReport: 'Self report',
+    linkedin: 'LinkedIn',
+    github: 'GitHub',
+  };
 
   return (
     <aside className="w-64 bg-gray-50 border-r border-neutral-200 p-5 overflow-y-auto flex-shrink-0">
@@ -578,6 +633,15 @@ function Sidebar({ characterCard, handleReset, competitorStatus, showPanel, setS
       <p className="text-neutral-500 text-sm mt-1">{profile.founderType}</p>
       <hr className="border-neutral-200 my-4" />
 
+      {profileLoading ? (
+        <div className="space-y-3 mb-4">
+          <div className="chat-skeleton h-4 w-2/3 rounded" />
+          <div className="chat-skeleton h-10 w-full rounded-xl" />
+          <div className="chat-skeleton h-10 w-full rounded-xl" />
+          <div className="chat-skeleton h-10 w-5/6 rounded-xl" />
+        </div>
+      ) : (
+        <>
       <Section title="Building">{profile.building}</Section>
       <Section title="Stage">{profile.stage}</Section>
       <Section title="Core Drive">{profile.coreDrive}</Section>
@@ -612,6 +676,8 @@ function Sidebar({ characterCard, handleReset, competitorStatus, showPanel, setS
 
       <Section title="Biggest Risk">{profile.biggestRisk}</Section>
       <Section title="Operating Style">{profile.operatingStyle}</Section>
+        </>
+      )}
 
       {/* Competitor Intel Panel */}
       <button
@@ -668,6 +734,25 @@ function Sidebar({ characterCard, handleReset, competitorStatus, showPanel, setS
         </div>
       )}
 
+      <div className="mt-4 border-t border-neutral-200 pt-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500">Settings</p>
+        <button
+          onClick={onRefetchProfiles}
+          disabled={refetchingProfiles}
+          className="w-full mt-3 text-xs text-neutral-700 hover:text-neutral-900 py-2 border border-neutral-200 hover:border-neutral-400 rounded-lg disabled:opacity-50 transition-colors"
+        >
+          {refetchingProfiles ? 'Re-fetching profiles...' : 'Re-fetch profiles'}
+        </button>
+        <div className="mt-2 space-y-1">
+          {Object.entries(sourceLabels).map(([source, label]) => (
+            <div key={source} className="flex items-center justify-between text-[11px] text-neutral-500">
+              <span>{label}</span>
+              <span className="capitalize">{ingestStatuses?.[source] || 'idle'}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <button
         onClick={handleReset}
         className="w-full mt-6 text-xs text-neutral-400 hover:text-red-500 transition-colors py-2 border border-neutral-200 hover:border-red-300 rounded-lg"
@@ -699,17 +784,20 @@ const CLIENT_MODELS = [
 ];
 
 export default function Chat({ characterCard }) {
-  const [messages, setMessages] = useState([]);
+  const userId = localStorage.getItem('lc_user_id') || 'anonymous';
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const { messages, sendMessage, clearHistory, isLoading, appendMessage } = useChat({ userId });
+  const { profile: loadedProfile, refetch: refetchProfile, isLoading: profileLoading, error: profileError } = useProfile({
+    userId,
+    initialCharacterCard: characterCard,
+  });
+  const [toasts, setToasts] = useState([]);
   const [activeModel, setActiveModel] = useState('gemini');
   const [refreshing, setRefreshing] = useState(false);
   const [competitorStatus, setCompetitorStatus] = useState(null);
   const [lastRefreshed, setLastRefreshed] = useState(null);
   const [showPanel, setShowPanel] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [toast, setToast] = useState(null);
-  const [overdueLoops, setOverdueLoops] = useState([]);
   const [showLoopBanner, setShowLoopBanner] = useState(false);
   const [reminderQueue, setReminderQueue] = useState([]);
   const [activeReminder, setActiveReminder] = useState(null);
@@ -724,10 +812,21 @@ export default function Chat({ characterCard }) {
   const [emailDraft, setEmailDraft] = useState(null);
   const [draftActionLoading, setDraftActionLoading] = useState(false);
   const [showScheduleComposer, setShowScheduleComposer] = useState(false);
-  const { isReady, embed } = useEmbeddings();
+  const [refetchingProfiles, setRefetchingProfiles] = useState(false);
+  const onboardingData = useMemo(() => {
+    try {
+      const saved = sessionStorage.getItem(`pulse_onboarding_${userId}`);
+      if (!saved) return null;
+      const parsed = JSON.parse(saved);
+      return parsed?.formData ? { ...parsed.formData, sourcePreferences: parsed.sourcePreferences } : null;
+    } catch {
+      return null;
+    }
+  }, [userId]);
+  const { statuses: ingestStatuses, refetchSource, proceedWithSkipped } = useIngest();
+  const { isReady } = useEmbeddings();
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
-  const toastTimeoutRef = useRef(null);
   const shownReminderIdsRef = useRef(new Set());
   const scheduledReminderTimersRef = useRef(new Map());
   const recognitionRef = useRef(null);
@@ -739,7 +838,8 @@ export default function Chat({ characterCard }) {
   const isLoadingRef = useRef(false);
   const conversationModeRef = useRef(false);
 
-  const profile = characterCard || DEFAULT_CHARACTER_CARD;
+  const profile = loadedProfile?.characterCard || characterCard || DEFAULT_CHARACTER_CARD;
+  const overdueLoops = loadedProfile?.openLoops || [];
   const hasHighUrgency = competitorStatus?.some((c) => c.urgency === 'high') || false;
   const selectedVoice = pickPulseVoice(availableVoices);
 
@@ -781,9 +881,10 @@ export default function Chat({ characterCard }) {
     try {
       recognitionRef.current.start();
     } catch (error) {
-      setToast('Mic is already active');
-      window.clearTimeout(toastTimeoutRef.current);
-      toastTimeoutRef.current = window.setTimeout(() => setToast(null), 3000);
+      setToasts((prev) => {
+        const next = [...prev, { id: `${Date.now()}_mic`, message: 'Mic is already active', type: 'error' }];
+        return next.slice(-3);
+      });
     }
   }, [clearVoiceAutoSendTimer, isListening, speechSupported]);
 
@@ -816,14 +917,15 @@ export default function Chat({ characterCard }) {
     setInput(normalized);
   }, [clearVoiceAutoSendTimer, isListening]);
 
-  const handleReset = async () => {
+  const handleReset = useCallback(async () => {
     if (!window.confirm('This will clear your profile and restart onboarding. Are you sure?')) return;
     try {
       await fetch('/api/session', { method: 'DELETE', credentials: 'include' });
     } catch (e) {}
+    clearHistory();
     localStorage.removeItem('pulse_token');
     window.location.reload();
-  };
+  }, [clearHistory]);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -842,21 +944,14 @@ export default function Chat({ characterCard }) {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('pulse_token');
     fetchStatus();
-    fetch('/api/loops/overdue', {
-      headers: { 'Authorization': `Bearer ${token}` },
-      credentials: 'include'
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.count > 0) {
-          setOverdueLoops(data.overdue);
-          setShowLoopBanner(true);
-        }
-      })
-      .catch(() => { });
   }, [fetchStatus]);
+
+  useEffect(() => {
+    if (overdueLoops.length > 0) {
+      setShowLoopBanner(true);
+    }
+  }, [overdueLoops]);
 
   const handleRefreshIntel = useCallback(async () => {
     if (refreshing) return;
@@ -871,6 +966,7 @@ export default function Chat({ characterCard }) {
       });
     } catch (e) {
       setRefreshing(false);
+      showToast('Failed to refresh competitor intel', 'error');
       return;
     }
 
@@ -889,11 +985,44 @@ export default function Chat({ characterCard }) {
         clearInterval(poll);
         setRefreshing(false);
         setLastRefreshed(new Date());
-        setToast('Intel updated');
-        setTimeout(() => setToast(null), 3000);
+        setToasts((prev) => [...prev, { id: `${Date.now()}_intel`, message: 'Intel updated', type: 'info' }].slice(-3));
       }
     }, 5000);
-  }, [refreshing, fetchStatus]);
+  }, [refreshing, fetchStatus, showToast]);
+
+  const handleRefetchProfiles = useCallback(async () => {
+    if (refetchingProfiles) return;
+    if (!onboardingData) {
+      showToast('No onboarding data found for re-fetch. Run onboarding once.', 'error');
+      return;
+    }
+
+    const labels = {
+      selfReport: 'Self report',
+      linkedin: 'LinkedIn',
+      github: 'GitHub',
+    };
+
+    setRefetchingProfiles(true);
+    try {
+      await Promise.all(['selfReport', 'linkedin', 'github'].map(async (source) => {
+        try {
+          await refetchSource(source, onboardingData);
+          showToast(`${labels[source]} refreshed`);
+        } catch (error) {
+          showToast(`${labels[source]} failed: ${error.message}`, 'error');
+        }
+      }));
+
+      await proceedWithSkipped(onboardingData);
+      await refetchProfile();
+      showToast('Profile context updated');
+    } catch (error) {
+      showToast(error.message || 'Failed to re-fetch profile sources', 'error');
+    } finally {
+      setRefetchingProfiles(false);
+    }
+  }, [onboardingData, proceedWithSkipped, refetchProfile, refetchSource, refetchingProfiles, showToast]);
 
   useEffect(() => {
     const token = localStorage.getItem('pulse_token');
@@ -903,10 +1032,10 @@ export default function Chat({ characterCard }) {
     })
       .then((r) => r.json())
       .then((d) => setActiveModel(d.activeModel))
-      .catch(() => { });
-  }, []);
+      .catch(() => showToast('Could not load model config', 'error'));
+  }, [showToast]);
 
-  const handleModelChange = async (e) => {
+  const handleModelChange = useCallback(async (e) => {
     const modelKey = e.target.value;
     setActiveModel(modelKey);
     try {
@@ -921,13 +1050,19 @@ export default function Chat({ characterCard }) {
         body: JSON.stringify({ modelKey }),
       });
     } catch (err) {
-      console.error('Failed to switch model:', err);
+      showToast('Failed to switch model', 'error');
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      textareaRef.current?.focus();
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     const recognitionCtor = getSpeechRecognitionCtor();
@@ -952,9 +1087,7 @@ export default function Chat({ characterCard }) {
     };
     recognition.onerror = () => {
       setIsListening(false);
-      setToast('Voice capture failed');
-      window.clearTimeout(toastTimeoutRef.current);
-      toastTimeoutRef.current = window.setTimeout(() => setToast(null), 3000);
+      setToasts((prev) => [...prev, { id: `${Date.now()}_voice_error`, message: 'Voice capture failed', type: 'error' }].slice(-3));
       setConversationStatus('Voice capture failed. Try again.');
     };
     recognition.onresult = (event) => {
@@ -1012,11 +1145,23 @@ export default function Chat({ characterCard }) {
     };
   }, []);
 
-  const showToast = useCallback((message) => {
-    setToast(message);
-    window.clearTimeout(toastTimeoutRef.current);
-    toastTimeoutRef.current = window.setTimeout(() => setToast(null), 3000);
+  const dismissToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((item) => item.id !== id));
   }, []);
+
+  const showToast = useCallback((message, type = 'info') => {
+    const id = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    setToasts((prev) => [...prev, { id, message, type }].slice(-3));
+    window.setTimeout(() => {
+      dismissToast(id);
+    }, 4000);
+  }, [dismissToast]);
+
+  useEffect(() => {
+    if (profileError?.message) {
+      showToast(profileError.message, 'error');
+    }
+  }, [profileError, showToast]);
 
   const handleDiscardEmailDraft = useCallback(() => {
     setEmailDraft(null);
@@ -1175,7 +1320,6 @@ export default function Chat({ characterCard }) {
 
   useEffect(() => {
     return () => {
-      window.clearTimeout(toastTimeoutRef.current);
       window.clearTimeout(voiceAutoSendTimeoutRef.current);
       window.clearTimeout(voiceRestartTimeoutRef.current);
       scheduledReminderTimersRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
@@ -1251,24 +1395,20 @@ export default function Chat({ characterCard }) {
         throw new Error(data.error || 'Failed to send email');
       }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: `Email sent to ${emailDraft.to.trim()} with subject "${emailDraft.subject.trim()}".`,
-          sources: ['gmail'],
-        },
-      ]);
+      appendMessage({
+        role: 'assistant',
+        content: `Email sent to ${emailDraft.to.trim()} with subject "${emailDraft.subject.trim()}".`,
+        sources: ['gmail'],
+      });
       showToast('Email sent');
       setEmailDraft(null);
       setShowScheduleComposer(false);
     } catch (error) {
-      console.error('Email send failed:', error);
-      showToast(error.message || 'Failed to send email');
+      showToast(error.message || 'Failed to send email', 'error');
     } finally {
       setDraftActionLoading(false);
     }
-  }, [draftActionLoading, emailDraft, showToast]);
+  }, [appendMessage, draftActionLoading, emailDraft, showToast]);
 
   const handleScheduleEmailDraft = useCallback(async () => {
     if (!emailDraft || draftActionLoading || !isEmailDraftReady(emailDraft) || !emailDraft.scheduledFor) return;
@@ -1296,73 +1436,67 @@ export default function Chat({ characterCard }) {
         throw new Error(data.error || 'Failed to schedule email');
       }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: `Email scheduled for ${formatScheduledTime(emailDraft.scheduledFor)}.`,
-          sources: ['gmail'],
-        },
-      ]);
+      appendMessage({
+        role: 'assistant',
+        content: `Email scheduled for ${formatScheduledTime(emailDraft.scheduledFor)}.`,
+        sources: ['gmail'],
+      });
       showToast('Email scheduled');
       setEmailDraft(null);
       setShowScheduleComposer(false);
     } catch (error) {
-      console.error('Email schedule failed:', error);
-      showToast(error.message || 'Failed to schedule email');
+      showToast(error.message || 'Failed to schedule email', 'error');
     } finally {
       setDraftActionLoading(false);
     }
-  }, [draftActionLoading, emailDraft, showToast]);
+  }, [appendMessage, draftActionLoading, emailDraft, showToast]);
+
+  const handleToggleScheduleComposer = useCallback(() => {
+    setShowScheduleComposer((prev) => !prev);
+    setEmailDraft((prev) => prev ? {
+      ...prev,
+      scheduledFor: prev.scheduledFor || getDefaultScheduleValue(),
+    } : prev);
+  }, []);
 
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text && selectedFiles.length === 0) return;
     if (isLoading) return;
 
-    const token = localStorage.getItem('pulse_token');
     const inputMode = inputModeRef.current;
     inputModeRef.current = 'text';
-
-    // Optimistically add user message
-    const userMsg = { 
-      role: 'user', 
-      content: text || (selectedFiles.length > 0 ? `Sent ${selectedFiles.length} file(s)` : ''),
-      files: selectedFiles.map(f => ({ name: f.name, type: f.type }))
-    };
-    
-    setMessages((prev) => [...prev, userMsg]);
-    setInput('');
     const filesToUpload = [...selectedFiles];
+    setInput('');
     setSelectedFiles([]);
-    setIsLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append('message', text);
-      
-      // We will let the server handle embedding now since it is multimodal
-      // queryEmbedding is no longer sent from client if server can do it with Gemini.
-      
-      filesToUpload.forEach((file) => {
-        formData.append('files', file);
-      });
+      const { result, assistantMessage } = await sendMessage(
+        { content: text, files: filesToUpload },
+        async ({ history }) => {
+          const token = localStorage.getItem('pulse_token');
+          const formData = new FormData();
+          formData.append('message', text);
+          filesToUpload.forEach((file) => {
+            formData.append('files', file);
+          });
+          formData.append('history', JSON.stringify(history.slice(-10)));
 
-      const history = messages.slice(-10);
-      formData.append('history', JSON.stringify(history));
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: 'include',
+            body: formData,
+          });
 
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-          // Content-Type is set automatically by fetch when using FormData
+          if (!res.ok) {
+            throw new Error('Chat request failed');
+          }
+
+          return res.json();
         },
-        credentials: 'include',
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error('Chat request failed');
-      const data = await res.json();
+      );
+      const data = result || {};
 
       if (data.emailDraft) {
         setEmailDraft({
@@ -1389,27 +1523,15 @@ export default function Chat({ characterCard }) {
         setConversationStatus('Saved to memory. Pulse is replying...');
       }
 
-      const assistantReply = normalizeAssistantReply(data.reply);
-
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: assistantReply, sources: data.sources },
-      ]);
-      speakPulseReply(assistantReply);
+      speakPulseReply(assistantMessage?.content || normalizeAssistantReply(data.reply));
     } catch (err) {
-      console.error('Chat error:', err);
       if (inputMode === 'voice') {
         setConversationStatus('Voice update failed. Try speaking again.');
         shouldResumeConversationRef.current = conversationMode;
       }
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: 'Something went wrong. Try again.' },
-      ]);
-    } finally {
-      setIsLoading(false);
+      showToast(err.message || 'Chat failed. Try again.', 'error');
     }
-  }, [embed, input, isLoading, messages, scheduleReminder, showToast, speakPulseReply]);
+  }, [conversationMode, input, isLoading, scheduleReminder, selectedFiles, sendMessage, showToast, speakPulseReply]);
 
   useEffect(() => {
     if (inputModeRef.current === 'voice' && input.trim() && !isLoading) {
@@ -1429,12 +1551,12 @@ export default function Chat({ characterCard }) {
     queueConversationResume();
   }, [conversationMode, isListening, isLoading, queueConversationResume]);
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = useCallback((e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
-  };
+  }, [handleSend]);
 
   return (
     <div className="min-h-screen flex items-center justify-center pt-16 pb-4">
@@ -1456,6 +1578,10 @@ export default function Chat({ characterCard }) {
             refreshing={refreshing}
             handleRefreshIntel={handleRefreshIntel}
             lastRefreshed={lastRefreshed}
+            profileLoading={profileLoading}
+            ingestStatuses={ingestStatuses}
+            onRefetchProfiles={handleRefetchProfiles}
+            refetchingProfiles={refetchingProfiles}
           />
 
           <div className="flex-1 flex flex-col min-w-0">
@@ -1487,24 +1613,8 @@ export default function Chat({ characterCard }) {
               )}
               <div className="chat-thread">
                 {messages.map((msg, i) => (
-                  <MessageRow key={i} message={msg} profile={profile} />
+                  <MessageRow key={msg.id || i} message={msg} profile={profile} />
                 ))}
-                {isLoading && (
-                  <div className="chat-message-row">
-                    <div className="chat-message-avatar chat-message-avatar-ai">
-                      <span>{getInitials(profile.name)}</span>
-                    </div>
-                    <div className="chat-message-stack">
-                      <div className="chat-message-meta">
-                        <span className="chat-message-author">{profile.name}</span>
-                        <span className="chat-message-badge">Cofounder</span>
-                      </div>
-                      <div className="chat-thinking">
-                        Thinking
-                      </div>
-                    </div>
-                  </div>
-                )}
                 <div ref={bottomRef} />
               </div>
             </div>
@@ -1551,8 +1661,8 @@ export default function Chat({ characterCard }) {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={isReady ? 'Send a prompt or run a command...' : 'Loading model...'}
-                  disabled={!isReady}
+                  placeholder={!isReady ? 'Loading model...' : isLoading ? 'Pulse is thinking...' : 'Send a prompt or run a command...'}
+                  disabled={!isReady || isLoading}
                   className="flex-1 resize-none text-sm text-neutral-800 placeholder-neutral-400 focus:outline-none bg-transparent disabled:opacity-50 leading-relaxed"
                 />
                 <button
@@ -1632,22 +1742,12 @@ export default function Chat({ characterCard }) {
         </div>
       </div>
 
-      {toast && (
-        <div className="fixed bottom-4 right-4 bg-neutral-800 text-white text-sm px-4 py-2 rounded-lg transition-opacity z-50">
-          {toast}
-        </div>
-      )}
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
       <EmailDraftCard
         draft={emailDraft}
         busy={draftActionLoading}
         scheduleOpen={showScheduleComposer}
-        onToggleSchedule={() => {
-          setShowScheduleComposer((prev) => !prev);
-          setEmailDraft((prev) => prev ? {
-            ...prev,
-            scheduledFor: prev.scheduledFor || getDefaultScheduleValue(),
-          } : prev);
-        }}
+        onToggleSchedule={handleToggleScheduleComposer}
         onChange={handleEmailDraftChange}
         onSend={handleSendEmailDraft}
         onSchedule={handleScheduleEmailDraft}
