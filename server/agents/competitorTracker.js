@@ -1,103 +1,84 @@
+import { getCompetitors, getRecentSummaries, insertIntel } from '../db/competitors.js';
 import { callLLM } from '../utils/llmCall.js';
-import { getCompetitors, insertIntel } from '../db/competitors.js';
+import { logger } from '../utils/logger.js';
 
-async function searchSerper(query) {
-  const res = await fetch('https://google.serper.dev/search', {
+async function searchSerper(query, timeframe = 'qdr:m') {
+  const response = await fetch('https://google.serper.dev/search', {
     method: 'POST',
     headers: {
-      'X-API-KEY': process.env.SERPER_API_KEY,
       'Content-Type': 'application/json',
+      'X-API-KEY': process.env.SERPER_API_KEY,
     },
-    body: JSON.stringify({ q: query, num: 5, tbs: 'qdr:m' }),
+    body: JSON.stringify({ q: query, num: 8, tbs: timeframe }),
   });
-  if (!res.ok) return { organic: [] };
-  return res.json();
+
+  return response.ok ? response.json() : { organic: [] };
 }
 
-async function processCompetitor(userId, competitor) {
+async function processCompetitor(userId, competitor, timeframe) {
+  const existingSummaries = await getRecentSummaries(userId, competitor.id, 5);
+  const existingContext = existingSummaries.length
+    ? `\nPREVIOUSLY TRACKED INTEL (DO NOT REPEAT THESE):\n- ${existingSummaries.join('\n- ')}`
+    : '';
   const queries = [
-    `${competitor.name} product launch OR new feature OR update`,
+    `${competitor.name} "product launch" OR "new feature" OR "update"`,
     `${competitor.name} funding OR valuation OR raised`,
     `${competitor.name} pricing OR hiring OR layoffs`,
   ];
-
-  const results = await Promise.all(queries.map(searchSerper));
-
-  const seen = new Set();
+  const results = await Promise.all(queries.map((query) => searchSerper(query, timeframe)));
+  const seenLinks = new Set();
+  const rawLinks = [];
   const combined = results
-    .flatMap((r) => r.organic || [])
-    .filter((r) => {
-      if (seen.has(r.title)) return false;
-      seen.add(r.title);
+    .flatMap((result) => result.organic || [])
+    .filter((item) => {
+      if (!item.link || seenLinks.has(item.link)) return false;
+      seenLinks.add(item.link);
+      rawLinks.push({ title: item.title, link: item.link, snippet: item.snippet });
       return true;
     })
-    .map((r) => `${r.title}: ${r.snippet}`)
-    .join('\n');
+    .map((item) => `SOURCE: ${item.link}\nTITLE: ${item.title}\nSNIPPET: ${item.snippet}`)
+    .join('\n\n---\n\n');
 
-  if (!combined) return;
+  if (!combined) {
+    return;
+  }
 
   const { text } = await callLLM({
-    system: 'You are a startup competitive intelligence analyst. Be specific and factual. Output JSON only.',
-    messages: [
-      {
-        role: 'user',
-        content: `You are analyzing competitive intelligence for a founder. From these search results about ${competitor.name}, extract the single most strategically significant development from this week.
+    system: 'You are a elite startup competitive intelligence analyst. Your goal is to find high-signal changes and ignore noise. Output JSON only.',
+    messages: [{
+      role: 'user',
+      content: `You are analyzing competitive intelligence for a founder. From these search results about ${competitor.name}, extract the single most strategically significant development.
 
-Output JSON:
-{
-  "summary": string,
-  "category": string,
-  "urgency": string
-}
+Output JSON structure:
+{ "summary": string, "category": "funding" | "product" | "hiring" | "pricing" | "general", "urgency": "high" | "medium" | "low", "sourceUrl": string }
 
-- summary: What happened + why it matters to a competing founder. Must include: what changed, how significant, what a competitor should do in response. 2-3 sentences.
-- category: exactly one of: funding | product | hiring | pricing | general
-- urgency: exactly one of: high | medium | low
+${existingContext}
 
-If the results contain no meaningful new development (just old news or noise), output: { "summary": "", "category": "general", "urgency": "low" }
+SEARCH RESULTS TO ANALYZE:
+${combined}
 
-Results:
-${combined}`,
-      },
-    ],
-    maxTokens: 300,
+If everything is already covered or irrelevant, output: { "summary": "", "category": "general", "urgency": "low", "sourceUrl": "" }`,
+    }],
+    maxTokens: 500,
   });
 
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) return;
-  const parsed = JSON.parse(jsonMatch[0]);
-
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) return;
+  const parsed = JSON.parse(match[0]);
   if (!parsed.summary) return;
 
-  await insertIntel(
-    userId,
-    competitor.id,
-    competitor.name,
-    parsed.summary,
-    JSON.stringify(results),
-    parsed.category || 'general',
-    parsed.urgency || 'low'
-  );
+  await insertIntel(userId, competitor.id, competitor.name, parsed.summary, JSON.stringify(rawLinks), parsed.category || 'general', parsed.urgency || 'low', parsed.sourceUrl || null);
 }
 
-export async function fetchCompetitorIntel(userId) {
-  const competitors = (await getCompetitors(userId)) || [];
-
-  const results = await Promise.allSettled(
-    competitors.map((c) => processCompetitor(userId, c))
-  );
-
-  for (const r of results) {
-    if (r.status === 'rejected') {
-      console.error('[CompetitorTracker] Competitor failed:', r.reason);
-    }
-  }
+export async function fetchCompetitorIntel(userId, force = false) {
+  const competitors = await getCompetitors(userId);
+  const timeframe = force ? 'qdr:m' : 'qdr:d';
+  const results = await Promise.allSettled(competitors.map((competitor) => processCompetitor(userId, competitor, timeframe)));
+  results.filter((result) => result.status === 'rejected').forEach((result) => {
+    logger.error('Competitor tracking task failed', { error: result.reason?.message || String(result.reason) });
+  });
 }
 
 export async function runDailyTracker(userId) {
-  try {
-    await fetchCompetitorIntel(userId);
-  } catch (err) {
-    console.error('[CompetitorTracker] Daily tracker failed:', err);
-  }
+  await fetchCompetitorIntel(userId, false);
 }

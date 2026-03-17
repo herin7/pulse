@@ -1,91 +1,114 @@
 import 'dotenv/config';
-import express from 'express';
-import cors from 'cors';
-import morgan from 'morgan';
-import session from 'express-session';
+
+import { randomUUID } from 'node:crypto';
+
 import pgSession from 'connect-pg-simple';
-import pool, { initDb } from './db/postgres.js';
+import cors from 'cors';
+import express from 'express';
+import session from 'express-session';
 import cron from 'node-cron';
-import ingestRouter from './routes/ingest.js';
-import storeRouter from './routes/store.js';
-import chatRouter from './routes/chat.js';
-import configRouter from './routes/config.js';
-import sessionRouter from './routes/session.js';
-import competitorsRouter from './routes/competitors.js';
-import gmailRouter from './routes/gmail.js';
-import loopsRouter from './routes/loops.js';
-import remindersRouter from './routes/reminders.js';
-import authRouter from './routes/auth.js';
-import agentSetupRouter from './routes/agentSetup.js';
+
 import { runDailyTracker } from './agents/competitorTracker.js';
 import { runScheduledEmailQueue } from './agents/emailScheduler.js';
+import pool, { initDb } from './db/postgres.js';
 import { connectMongo } from './db/mongo.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import agentSetupRouter from './routes/agentSetup.js';
+import authRouter from './routes/auth.js';
+import chatRouter from './routes/chat.js';
+import competitorsRouter from './routes/competitors.js';
+import configRouter from './routes/config.js';
+import gmailRouter from './routes/gmail.js';
+import ingestRouter from './routes/ingest.js';
+import loopsRouter from './routes/loops.js';
+import remindersRouter from './routes/reminders.js';
+import sessionRouter from './routes/session.js';
+import storeRouter from './routes/store.js';
+import { getLogContext, logger } from './utils/logger.js';
 
-const pgStore = pgSession(session);
 const app = express();
-const PORT = process.env.PORT || 3001;
+const port = Number(process.env.PORT || 3001);
+const sessionStore = pgSession(session);
 
-app.use(cors({
-  origin: ['http://localhost:5173', 'https://pulse-client-olive.vercel.app'],
-  credentials: true,
-}));
-app.use(morgan('dev'));
-app.use(express.json({ limit: '10mb' }));
-app.use(session({
-  store: new pgStore({
-    pool: pool,
-    tableName: 'session'
-  }),
-  secret: process.env.SESSION_SECRET || 'pulse-dev-secret',
-  resave: false,
-  saveUninitialized: false,
-  rolling: true,
-  cookie: {
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-  },
-}));
-
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' });
-});
-
-app.use(ingestRouter);
-app.use(storeRouter);
-app.use(chatRouter);
-app.use(configRouter);
-app.use('/api', sessionRouter);
-app.use('/api/competitors', competitorsRouter);
-app.use('/api/gmail', gmailRouter);
-app.use('/api/loops', loopsRouter);
-app.use('/api/reminders', remindersRouter);
-app.use('/api/auth', authRouter);
-app.use('/api/agent-setup', agentSetupRouter);
-
-Promise.all([initDb(), connectMongo()]).then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server listening on http://localhost:${PORT}`);
-
-    runScheduledEmailQueue().catch((error) => {
-      console.error('[Scheduler] Initial email queue run failed:', error);
+function mountRequestContext() {
+  app.use((req, res, next) => {
+    req.requestId = randomUUID();
+    req.requestStartedAt = Date.now();
+    res.setHeader('x-request-id', req.requestId);
+    res.on('finish', () => {
+      logger.info('Request completed', {
+        ...getLogContext(req, { durationMs: Date.now() - req.requestStartedAt }),
+        method: req.method,
+        route: req.originalUrl,
+        statusCode: res.statusCode,
+      });
     });
-
-    setInterval(() => {
-      runScheduledEmailQueue().catch((error) => {
-        console.error('[Scheduler] Email queue run failed:', error);
-      });
-    }, 30000);
-
-    if (process.env.TRACKER_USER_ID) {
-      cron.schedule('0 8 * * *', () => {
-        console.log('[Cron] Running daily competitor tracker...');
-        runDailyTracker(process.env.TRACKER_USER_ID);
-      });
-      console.log('[Cron] Daily competitor tracker scheduled at 08:00');
-    }
+    next();
   });
-}).catch((err) => {
-  console.error('Failed to initialize database:', err);
+}
+
+function mountMiddleware() {
+  app.use(cors({ origin: ['http://localhost:5173', 'https://pulse-client-olive.vercel.app'], credentials: true }));
+  app.use(express.json({ limit: '10mb' }));
+  app.use(session({
+    store: new sessionStore({ pool, tableName: 'session' }),
+    secret: process.env.SESSION_SECRET || 'pulse-dev-secret',
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: { maxAge: 30 * 24 * 60 * 60 * 1000, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' },
+  }));
+}
+
+function mountRoutes() {
+  app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+  app.use(ingestRouter);
+  app.use(storeRouter);
+  app.use(chatRouter);
+  app.use(configRouter);
+  app.use('/api', sessionRouter);
+  app.use('/api/auth', authRouter);
+  app.use('/api/agent-setup', agentSetupRouter);
+  app.use('/api/competitors', competitorsRouter);
+  app.use('/api/gmail', gmailRouter);
+  app.use('/api/loops', loopsRouter);
+  app.use('/api/reminders', remindersRouter);
+  app.use(errorHandler);
+}
+
+function startSchedulers() {
+  runScheduledEmailQueue().catch((error) => {
+    logger.error('Initial scheduled email run failed', { error: error.message });
+  });
+
+  setInterval(() => {
+    runScheduledEmailQueue().catch((error) => {
+      logger.error('Scheduled email run failed', { error: error.message });
+    });
+  }, 30000);
+
+  if (process.env.TRACKER_USER_ID) {
+    cron.schedule('0 8 * * *', () => {
+      runDailyTracker(process.env.TRACKER_USER_ID).catch((error) => {
+        logger.error('Daily tracker run failed', { error: error.message });
+      });
+    });
+  }
+}
+
+async function startServer() {
+  await Promise.all([initDb(), connectMongo()]);
+  app.listen(port, () => {
+    logger.info('Server started', { port });
+  });
+  startSchedulers();
+}
+
+mountRequestContext();
+mountMiddleware();
+mountRoutes();
+
+startServer().catch((error) => {
+  logger.error('Server failed to start', { error: error.message, stack: error.stack });
   process.exit(1);
 });

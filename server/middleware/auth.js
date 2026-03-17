@@ -1,40 +1,26 @@
-import jwt from 'jsonwebtoken';
 import { User } from '../db/models/User.js';
+import { AppError } from '../utils/AppError.js';
+import { getTokenFromRequest, verifyAuthToken } from '../utils/authTokens.js';
 
-function getTokenFromRequest(req) {
-    const authHeader = req.headers.authorization?.split(' ')[1];
-    if (authHeader && authHeader !== 'null' && authHeader !== 'undefined') {
-        return authHeader;
+export async function requireAuth(req, _res, next) {
+  try {
+    const token = getTokenFromRequest(req);
+
+    if (!token) {
+      throw new AppError('Authentication required', 401, 'AUTH_REQUIRED');
     }
 
-    const cookieHeader = req.headers.cookie || '';
-    const match = cookieHeader.match(/pulse_token=([^;]+)/);
-    return match?.[1] || null;
+    const decoded = verifyAuthToken(token);
+    const user = await User.findById(decoded.id).select('-password');
+
+    if (!user) {
+      throw new AppError('User not found', 401, 'USER_NOT_FOUND');
+    }
+
+    req.user = user;
+    req.session.userId = user._id.toString();
+    next();
+  } catch (error) {
+    next(error);
+  }
 }
-
-export const requireAuth = async (req, res, next) => {
-    try {
-        const token = getTokenFromRequest(req);
-        if (!token) {
-            return res.status(401).json({ error: 'Authentication required' });
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'pulse-dev-jwt-secret');
-        const user = await User.findById(decoded.id).select('-password');
-
-        if (!user) {
-            return res.status(401).json({ error: 'User not found' });
-        }
-
-        req.user = user;
-        if (!req.session) {
-            req.session = {};
-        }
-        req.session.userId = user._id.toString();
-
-        next();
-    } catch (error) {
-        console.error('[Auth] Token error:', error);
-        res.status(401).json({ error: 'Invalid or expired token' });
-    }
-};

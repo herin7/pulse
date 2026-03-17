@@ -1,108 +1,88 @@
 import { Router } from 'express';
-import { requireAuth } from '../middleware/auth.js';
+
 import { insertEmailAction } from '../db/emailActions.js';
+import { requireAuth } from '../middleware/auth.js';
+import { getAgentProfileForUser } from '../services/agentProfileService.js';
+import { AppError } from '../utils/AppError.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 import { isGmailConfigured, sendGmailMessage } from '../utils/gmail.js';
-import { getAgentProfileForUser } from './agentSetup.js';
 
 const router = Router();
 
-function normalizeScheduleTime(value) {
+function parseScheduleTime(value) {
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return null;
-  }
-  return parsed;
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-router.get('/status', requireAuth, async (req, res) => {
+async function loadGmailProfile(userId) {
+  const agentProfile = await getAgentProfileForUser(userId);
+
+  if (!isGmailConfigured(agentProfile)) {
+    throw new AppError('Gmail is not configured', 400, 'GMAIL_NOT_CONFIGURED');
+  }
+
+  return agentProfile;
+}
+
+router.get('/status', requireAuth, asyncHandler(async (req, res) => {
   const agentProfile = await getAgentProfileForUser(req.user._id);
   res.json({
     configured: isGmailConfigured(agentProfile),
     sender: process.env.GMAIL_SENDER_EMAIL || agentProfile?.gmailConnection?.connectedEmail || null,
   });
-});
+}));
 
-router.post('/send', requireAuth, async (req, res) => {
-  try {
-    const { to, subject, body } = req.body;
-
-    if (!to || !subject || !body) {
-      return res.status(400).json({ error: 'to, subject, and body are required' });
-    }
-
-    const agentProfile = await getAgentProfileForUser(req.user._id);
-
-    if (!isGmailConfigured(agentProfile)) {
-      return res.status(400).json({ error: 'Gmail is not configured' });
-    }
-
-    const result = await sendGmailMessage({ to, subject, body, agentProfile });
-    const emailAction = await insertEmailAction({
-      userId: req.user.id,
-      toEmail: to,
-      subject,
-      body,
-      status: 'sent',
-      providerMessageId: result.id,
-      threadId: result.threadId,
-      source: 'api',
-      sentAt: new Date().toISOString(),
-    });
-
-    res.json({
-      success: true,
-      sender: result.from,
-      messageId: result.id,
-      threadId: result.threadId,
-      emailAction,
-    });
-  } catch (error) {
-    console.error('Gmail send failed:', error);
-    res.status(500).json({ error: 'Failed to send Gmail message' });
+router.post('/send', requireAuth, asyncHandler(async (req, res) => {
+  const { body, subject, to } = req.body;
+  if (!to || !subject || !body) {
+    throw new AppError('to, subject, and body are required', 400, 'INVALID_EMAIL_PAYLOAD');
   }
-});
 
-router.post('/schedule', requireAuth, async (req, res) => {
-  try {
-    const { to, subject, body, scheduledFor } = req.body;
+  const agentProfile = await loadGmailProfile(req.user._id);
+  const result = await sendGmailMessage({ to, subject, body, agentProfile });
+  const emailAction = await insertEmailAction({
+    userId: req.user.id,
+    toEmail: to,
+    subject,
+    body,
+    status: 'sent',
+    providerMessageId: result.id,
+    threadId: result.threadId,
+    source: 'api',
+    sentAt: new Date().toISOString(),
+  });
 
-    if (!to || !subject || !body || !scheduledFor) {
-      return res.status(400).json({ error: 'to, subject, body, and scheduledFor are required' });
-    }
+  res.json({ success: true, sender: result.from, messageId: result.id, threadId: result.threadId, emailAction });
+}));
 
-    const agentProfile = await getAgentProfileForUser(req.user._id);
-
-    if (!isGmailConfigured(agentProfile)) {
-      return res.status(400).json({ error: 'Gmail is not configured' });
-    }
-
-    const scheduledDate = normalizeScheduleTime(scheduledFor);
-    if (!scheduledDate) {
-      return res.status(400).json({ error: 'scheduledFor must be a valid date' });
-    }
-
-    if (scheduledDate.getTime() <= Date.now() + 30 * 1000) {
-      return res.status(400).json({ error: 'scheduledFor must be at least 30 seconds in the future' });
-    }
-
-    const emailAction = await insertEmailAction({
-      userId: req.user.id,
-      toEmail: to,
-      subject,
-      body,
-      status: 'scheduled',
-      source: 'api',
-      scheduledFor: scheduledDate.toISOString(),
-    });
-
-    res.json({
-      success: true,
-      emailAction,
-    });
-  } catch (error) {
-    console.error('Gmail schedule failed:', error);
-    res.status(500).json({ error: 'Failed to schedule Gmail message' });
+router.post('/schedule', requireAuth, asyncHandler(async (req, res) => {
+  const { body, scheduledFor, subject, to } = req.body;
+  if (!to || !subject || !body || !scheduledFor) {
+    throw new AppError('to, subject, body, and scheduledFor are required', 400, 'INVALID_EMAIL_PAYLOAD');
   }
-});
+
+  await loadGmailProfile(req.user._id);
+  const scheduledDate = parseScheduleTime(scheduledFor);
+
+  if (!scheduledDate) {
+    throw new AppError('scheduledFor must be a valid date', 400, 'INVALID_SCHEDULE_DATE');
+  }
+
+  if (scheduledDate.getTime() <= Date.now() + 30 * 1000) {
+    throw new AppError('scheduledFor must be at least 30 seconds in the future', 400, 'SCHEDULE_TOO_SOON');
+  }
+
+  const emailAction = await insertEmailAction({
+    userId: req.user.id,
+    toEmail: to,
+    subject,
+    body,
+    status: 'scheduled',
+    source: 'api',
+    scheduledFor: scheduledDate.toISOString(),
+  });
+
+  res.json({ success: true, emailAction });
+}));
 
 export default router;

@@ -1,166 +1,104 @@
 import { Router } from 'express';
-import jwt from 'jsonwebtoken';
+
 import { User } from '../db/models/User.js';
 import { getCharacterCard } from '../db/qdrant.js';
+import { AppError } from '../utils/AppError.js';
+import { clearAuthCookie, createAuthToken, getTokenFromRequest, setAuthCookie, verifyAuthToken } from '../utils/authTokens.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
 const router = Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'pulse-dev-jwt-secret';
-const AUTH_COOKIE_NAME = 'pulse_token';
-const AUTH_COOKIE_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 
-const generateToken = (id) => {
-    return jwt.sign({ id }, JWT_SECRET, {
-        expiresIn: '30d'
-    });
-};
-
-function getTokenFromRequest(req) {
-    const authHeader = req.headers.authorization?.split(' ')[1];
-    if (authHeader && authHeader !== 'null' && authHeader !== 'undefined') {
-        return authHeader;
-    }
-
-    const cookieHeader = req.headers.cookie || '';
-    const match = cookieHeader.match(new RegExp(`${AUTH_COOKIE_NAME}=([^;]+)`));
-    return match?.[1] || null;
+function validateCredentials(email, password) {
+  if (!email || !password) {
+    throw new AppError('Please provide email and password', 400, 'INVALID_CREDENTIALS');
+  }
 }
 
-function setAuthCookie(res, token) {
-    res.cookie(AUTH_COOKIE_NAME, token, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: AUTH_COOKIE_MAX_AGE,
-        path: '/',
-    });
+function attachSessionProfile(req, userId, characterCard) {
+  req.session.userId = userId;
+
+  if (characterCard) {
+    req.session.characterCard = characterCard;
+    req.session.storeDone = true;
+  }
 }
 
-function clearAuthCookie(res) {
-    res.clearCookie(AUTH_COOKIE_NAME, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
-    });
+function buildAuthResponse(user, token, characterCard) {
+  return {
+    success: true,
+    token,
+    user: {
+      id: user._id,
+      email: user.email,
+    },
+    characterCard,
+  };
 }
 
-router.post('/signup', async (req, res) => {
-    const { email, password } = req.body;
+router.post('/signup', asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  validateCredentials(email, password);
 
-    try {
-        if (!email || !password) {
-            return res.status(400).json({ error: 'Please provide email and password' });
-        }
+  if (await User.findOne({ email })) {
+    throw new AppError('User already exists', 400, 'USER_EXISTS');
+  }
 
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ error: 'User already exists' });
-        }
+  const user = await User.create({ email, password });
+  const token = createAuthToken(user._id);
+  const characterCard = await getCharacterCard(user._id.toString());
 
-        const user = await User.create({ email, password });
-        const token = generateToken(user._id);
-        const characterCard = await getCharacterCard(user._id.toString());
-        setAuthCookie(res, token);
+  setAuthCookie(res, token);
+  attachSessionProfile(req, user._id.toString(), characterCard);
+  res.status(201).json(buildAuthResponse(user, token, characterCard));
+}));
 
-        req.session.userId = user._id.toString();
-        if (characterCard) {
-            req.session.characterCard = characterCard;
-            req.session.storeDone = true;
-        }
+router.post('/signin', asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  validateCredentials(email, password);
 
-        res.status(201).json({
-            success: true,
-            token,
-            user: {
-                id: user._id,
-                email: user.email
-            },
-            characterCard
-        });
-    } catch (error) {
-        console.error('[Auth] Signup error:', error);
-        res.status(500).json({ error: 'Server error during signup' });
-    }
-});
+  const user = await User.findOne({ email });
+  const isMatch = user ? await user.comparePassword(password) : false;
 
-router.post('/signin', async (req, res) => {
-    const { email, password } = req.body;
+  if (!user || !isMatch) {
+    throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
+  }
 
-    try {
-        if (!email || !password) {
-            return res.status(400).json({ error: 'Please provide email and password' });
-        }
+  const token = createAuthToken(user._id);
+  const characterCard = await getCharacterCard(user._id.toString());
 
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
+  setAuthCookie(res, token);
+  attachSessionProfile(req, user._id.toString(), characterCard);
+  res.json(buildAuthResponse(user, token, characterCard));
+}));
 
-        const isMatch = await user.comparePassword(password);
-        if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
+router.get('/me', asyncHandler(async (req, res) => {
+  const token = getTokenFromRequest(req);
+  if (!token) {
+    throw new AppError('Not authenticated', 401, 'AUTH_REQUIRED');
+  }
 
-        const token = generateToken(user._id);
-        const characterCard = await getCharacterCard(user._id.toString());
-        setAuthCookie(res, token);
+  const decoded = verifyAuthToken(token);
+  const user = await User.findById(decoded.id).select('-password');
 
-        req.session.userId = user._id.toString();
-        if (characterCard) {
-            req.session.characterCard = characterCard;
-            req.session.storeDone = true;
-        }
+  if (!user) {
+    throw new AppError('User not found', 401, 'USER_NOT_FOUND');
+  }
 
-        res.json({
-            success: true,
-            token,
-            user: {
-                id: user._id,
-                email: user.email
-            },
-            characterCard
-        });
-    } catch (error) {
-        console.error('[Auth] Signin error:', error);
-        res.status(500).json({ error: 'Server error during signin' });
-    }
-});
+  const characterCard = await getCharacterCard(user._id.toString());
+  attachSessionProfile(req, user._id.toString(), characterCard);
+  res.json({
+    success: true,
+    user: { id: user._id, email: user.email },
+    characterCard,
+  });
+}));
 
-router.get('/me', async (req, res) => {
-    try {
-        const token = getTokenFromRequest(req);
-        if (!token) return res.status(401).json({ error: 'Not authenticated' });
-
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const user = await User.findById(decoded.id).select('-password');
-
-        if (!user) return res.status(401).json({ error: 'User not found' });
-        const characterCard = await getCharacterCard(user._id.toString());
-
-        req.session.userId = user._id.toString();
-        if (characterCard) {
-            req.session.characterCard = characterCard;
-            req.session.storeDone = true;
-        }
-
-        res.json({
-            success: true,
-            user: {
-                id: user._id,
-                email: user.email
-            },
-            characterCard
-        });
-    } catch (err) {
-        res.status(401).json({ error: 'Invalid token' });
-    }
-});
-
-router.post('/logout', (req, res) => {
-    clearAuthCookie(res);
-    req.session?.destroy?.(() => {
-        res.json({ success: true });
-    });
-});
+router.post('/logout', asyncHandler(async (req, res) => {
+  clearAuthCookie(res);
+  if (req.session?.destroy) {
+    await new Promise((resolve) => req.session.destroy(() => resolve()));
+  }
+  res.json({ success: true });
+}));
 
 export default router;

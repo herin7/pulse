@@ -13,13 +13,21 @@ export async function getCompetitors(userId) {
   return res.rows;
 }
 
-export async function insertIntel(userId, competitorId, competitorName, summary, rawResults, category, urgency = 'low') {
+export async function insertIntel(userId, competitorId, competitorName, summary, rawResults, category, urgency = 'low', sourceUrl = null) {
   const res = await pool.query(
-    `INSERT INTO competitor_intel ("userId", "competitorId", "competitorName", summary, "rawResults", category, urgency) 
-     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-    [userId, competitorId, competitorName, summary, rawResults, category, urgency]
+    `INSERT INTO competitor_intel ("userId", "competitorId", "competitorName", summary, "rawResults", category, urgency, "sourceUrl") 
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+    [userId, competitorId, competitorName, summary, rawResults, category, urgency, sourceUrl]
   );
   return res.rows[0];
+}
+
+export async function getRecentSummaries(userId, competitorId, limit = 5) {
+  const res = await pool.query(
+    'SELECT summary FROM competitor_intel WHERE "userId" = $1 AND "competitorId" = $2 ORDER BY "fetchedAt" DESC LIMIT $3',
+    [userId, competitorId, limit]
+  );
+  return res.rows.map(r => r.summary);
 }
 
 export async function getRecentIntel(userId, days = 7) {

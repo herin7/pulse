@@ -1,38 +1,46 @@
 import { Router } from 'express';
-import { ensureCollection, upsertChunks, upsertCharacterCard } from '../db/qdrant.js';
+
+import { batchEmbedTexts } from '../utils/nvidiaEmbedding.js';
 import { callLLM } from '../utils/llmCall.js';
+import { ensureCollection, upsertCharacterCard, upsertChunks } from '../db/qdrant.js';
 import { requireAuth } from '../middleware/auth.js';
+import { AppError } from '../utils/AppError.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
 const router = Router();
+const PROFILE_SYSTEM_PROMPT =
+  'You are a founder talent analyst who has evaluated 1000+ early-stage founders. You write profiles that are specific enough that if you swapped the name, a reader could NOT confuse this person with any other founder. Vague phrases like "passionate about technology" or "strong communicator" are forbidden. Every field must contain a concrete, verifiable observation. Output ONLY valid JSON with no commentary.';
 
-router.post('/api/store', requireAuth, async (req, res) => {
-  try {
-    const { chunks } = req.body;
-    const userId = req.user.id;
+function buildSynthesisContext(chunks) {
+  const grouped = chunks.reduce((accumulator, chunk) => {
+    accumulator[chunk.source] = accumulator[chunk.source] || [];
+    accumulator[chunk.source].push(chunk);
+    return accumulator;
+  }, {});
 
-    if (!chunks) {
-      return res.status(400).json({ error: 'chunks are required' });
-    }
+  return Object.values(grouped)
+    .flatMap((items) => items.sort((left, right) => left.chunkIndex - right.chunkIndex).slice(0, 5))
+    .map((chunk) => `[${chunk.source}]: ${chunk.text}`)
+    .join('\n\n');
+}
 
-    await ensureCollection();
-    await upsertChunks(userId, chunks);
+router.post('/api/store', requireAuth, asyncHandler(async (req, res) => {
+  const incomingChunks = req.body.chunks;
+  if (!Array.isArray(incomingChunks) || !incomingChunks.length) {
+    throw new AppError('Valid chunks are required', 400, 'INVALID_CHUNKS');
+  }
 
-    const bySource = {};
-    chunks.forEach((chunk) => {
-      if (!bySource[chunk.source]) bySource[chunk.source] = [];
-      bySource[chunk.source].push(chunk);
-    });
+  await ensureCollection();
 
-    const balanced = Object.values(bySource)
-      .flatMap((items) => items.sort((a, b) => a.chunkIndex - b.chunkIndex).slice(0, 5));
-    const synthesisContext = balanced.map((chunk) => `[${chunk.source}]: ${chunk.text}`).join('\n\n');
+  const embeddings = await batchEmbedTexts(incomingChunks.map((chunk) => chunk.text));
+  const chunks = incomingChunks.map((chunk, index) => ({ ...chunk, embedding: embeddings[index] }));
+  await upsertChunks(req.user.id, chunks);
 
-    const { text: rawText } = await callLLM({
-      system: 'You are a founder talent analyst who has evaluated 1000+ early-stage founders. You write profiles that are specific enough that if you swapped the name, a reader could NOT confuse this person with any other founder. Vague phrases like "passionate about technology" or "strong communicator" are forbidden. Every field must contain a concrete, verifiable observation. Output ONLY valid JSON with no commentary.',
-      messages: [
-        {
-          role: 'user',
-          content: `Here is raw data about a founder - their self-report, LinkedIn, and GitHub activity. Extract a founder profile. Be a mirror, not a cheerleader. Identify what they are actually doing vs what they say they want to do. Note gaps between ambition and current output. Output this exact JSON:
+  const { text } = await callLLM({
+    system: PROFILE_SYSTEM_PROMPT,
+    messages: [{
+      role: 'user',
+      content: `Here is raw data about a founder - their self-report, LinkedIn, and GitHub activity. Extract a founder profile. Be a mirror, not a cheerleader. Identify what they are actually doing vs what they say they want to do. Note gaps between ambition and current output. Output this exact JSON:
 {
   "name": string,
   "founderType": string,
@@ -50,30 +58,22 @@ router.post('/api/store', requireAuth, async (req, res) => {
 Guidelines:
 - founderType: e.g. "Technical solo founder", "Second-time operator"
 - stage: e.g. "Pre-product", "0->1", "Early traction"
-- founderStrengths: top 3, founder-specific behavior patterns (e.g. "Ships fast without overthinking")
-- blindspots: brutal and specific to their founder journey, not generic advice
-- biggestRisk: the single most likely reason this startup fails
+- founderStrengths: top 3, founder-specific behavior patterns
+- blindspots: brutal and specific to their founder journey
+- biggestRisk: single most likely reason this startup fails
 
 Context:
-${synthesisContext}`,
-        },
-      ],
-      maxTokens: 1500,
-    });
+${buildSynthesisContext(chunks)}`,
+    }],
+    maxTokens: 4000,
+  });
 
-    const raw = rawText.replace(/```json|```/g, '').trim();
-    const card = JSON.parse(raw);
+  const characterCard = JSON.parse(text.replace(/```json|```/g, '').trim());
+  await upsertCharacterCard(req.user.id, characterCard);
 
-    await upsertCharacterCard(userId, card);
-
-    req.session.characterCard = card;
-    req.session.storeDone = true;
-
-    res.json({ characterCard: card });
-  } catch (err) {
-    console.error('Store error:', err);
-    res.status(500).json({ error: 'Store failed' });
-  }
-});
+  req.session.characterCard = characterCard;
+  req.session.storeDone = true;
+  res.json({ characterCard });
+}));
 
 export default router;

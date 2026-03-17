@@ -1,9 +1,17 @@
 import { Router } from 'express';
+
 import { deleteUserData } from '../db/qdrant.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
 
 const router = Router();
 
-router.get('/session', (req, res) => {
+function saveSession(req) {
+  return new Promise((resolve, reject) => {
+    req.session.save((error) => (error ? reject(error) : resolve()));
+  });
+}
+
+router.get('/session', asyncHandler(async (req, res) => {
   if (req.session.storeDone && req.session.characterCard) {
     return res.json({
       exists: true,
@@ -11,28 +19,20 @@ router.get('/session', (req, res) => {
       characterCard: req.session.characterCard,
     });
   }
-  res.json({ exists: false });
-});
 
-router.delete('/session', async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    if (userId) {
-      await deleteUserData(userId);
-    }
+  return res.json({ exists: false });
+}));
 
-    delete req.session.characterCard;
-    delete req.session.storeDone;
-    delete req.session.ingestDone;
-
-    req.session.save((err) => {
-      if (err) console.error('Session save error:', err);
-      res.json({ success: true });
-    });
-  } catch (err) {
-    console.error('Session delete error:', err);
-    res.status(500).json({ error: 'Failed to reset profile' });
+router.delete('/session', asyncHandler(async (req, res) => {
+  if (req.session.userId) {
+    await deleteUserData(req.session.userId);
   }
-});
+
+  delete req.session.characterCard;
+  delete req.session.storeDone;
+  delete req.session.ingestDone;
+  await saveSession(req);
+  res.json({ success: true });
+}));
 
 export default router;

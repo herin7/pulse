@@ -1,27 +1,32 @@
 import { Router } from 'express';
-import { getCompetitors, getIntelByCompetitor } from '../db/competitors.js';
+
 import { fetchCompetitorIntel } from '../agents/competitorTracker.js';
+import { getCompetitors, getIntelByCompetitor } from '../db/competitors.js';
 import { requireAuth } from '../middleware/auth.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { getLogContext, logger } from '../utils/logger.js';
 
 const router = Router();
 
-router.post('/refresh', requireAuth, (req, res) => {
-  const userId = req.user.id;
+router.post('/refresh', requireAuth, asyncHandler(async (req, res) => {
+  fetchCompetitorIntel(req.user.id).catch((error) => {
+    logger.error('Competitor refresh failed', {
+      ...getLogContext(req),
+      error: error.message,
+    });
+  });
 
-  fetchCompetitorIntel(userId).catch(console.error);
   res.json({ success: true });
-});
+}));
 
-router.get('/status', requireAuth, async (req, res) => {
-  const userId = req.user.id;
-
-  const competitors = (await getCompetitors(userId)) || [];
-
-  const result = await Promise.all(competitors.map(async (c) => {
-    const intel = await getIntelByCompetitor(userId, c.id);
+router.get('/status', requireAuth, asyncHandler(async (req, res) => {
+  const competitors = await getCompetitors(req.user.id);
+  const items = await Promise.all(competitors.map(async (competitor) => {
+    const intel = await getIntelByCompetitor(req.user.id, competitor.id);
     const latest = intel[0] || null;
+
     return {
-      name: c.name,
+      name: competitor.name,
       lastFetched: latest?.fetchedAt || null,
       latestSummary: latest?.summary || null,
       urgency: latest?.urgency || null,
@@ -30,10 +35,10 @@ router.get('/status', requireAuth, async (req, res) => {
   }));
 
   res.json({
-    competitors: result,
+    competitors: items,
     totalTracked: competitors.length,
-    hasHighUrgency: result.some((c) => c.urgency === 'high'),
+    hasHighUrgency: items.some((item) => item.urgency === 'high'),
   });
-});
+}));
 
 export default router;
